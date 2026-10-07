@@ -29,3 +29,15 @@ def test_estimate_returns_duration(client):
     data = resp.get_json()
     assert "display" in data
     assert data["total_seconds"] > 0
+
+
+def test_scans_list_endpoint(client):
+    resp = client.get("/api/scans")
+    assert resp.status_code == 200
+    assert isinstance(resp.get_json(), list)
+
+
+def test_history_page_renders(client):
+    resp = client.get("/history")
+    assert resp.status_code == 200
+    assert b"Scan History" in resp.data

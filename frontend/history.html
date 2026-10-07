@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan History | VulnScan Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/results.css') }}?v=1.1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .history-wrap { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        .history-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono, monospace); }
+        .history-table th, .history-table td { text-align: left; padding: 0.85rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .history-table th { color: var(--text-muted, #9ca3af); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .history-table tr:hover td { background: rgba(255,255,255,0.03); }
+        .grade-pill { font-weight: 800; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.8rem; }
+        .g-A,.g-B { background: rgba(34,197,94,0.15); color:#22c55e; }
+        .g-C { background: rgba(56,189,248,0.15); color:#38bdf8; }
+        .g-D { background: rgba(249,115,22,0.15); color:#f97316; }
+        .g-F { background: rgba(239,68,68,0.15); color:#ef4444; }
+        .hist-link { color: var(--neon-green, #22c55e); text-decoration: none; }
+        .hist-empty { color: var(--text-muted, #9ca3af); text-align:center; padding: 3rem; font-family: var(--font-mono, monospace); }
+    </style>
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="grid-overlay" style="opacity:0.5;"></div>
+    </div>
+
+    <nav class="results-nav">
+        <div class="nav-wrapper">
+            <div class="logo-text" style="font-size: 1.5rem; margin: 0;">
+                <i class="fas fa-shield-halved logo-icon" style="font-size: 1.2rem;"></i>
+                VULNSCAN PRO
+            </div>
+            <div class="nav-actions">
+                <a href="/" class="action-btn btn-primary" style="text-decoration:none;">
+                    <i class="fas fa-plus"></i> NEW SCAN
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="history-wrap">
+        <h1 style="font-family:var(--font-mono,monospace); margin-bottom:1.5rem;">
+            <i class="fas fa-clock-rotate-left"></i> Scan History
+        </h1>
+        <div id="historyBody">
+            <p class="hist-empty"><i class="fas fa-circle-notch fa-spin"></i> Loading…</p>
+        </div>
+    </main>
+
+    <script>
+        function gradeClass(g) { return 'grade-pill g-' + (g || 'F'); }
+        function fmt(ts) { if (!ts) return '—'; const d = new Date(ts); return d.toLocaleString(); }
+
+        fetch('/api/scans')
+            .then(r => r.json())
+            .then(rows => {
+                const el = document.getElementById('historyBody');
+                if (!rows.length) {
+                    el.innerHTML = '<p class="hist-empty">No scans yet. Run your first scan to see it here.</p>';
+                    return;
+                }
+                const body = rows.map(s => `
+                    <tr>
+                        <td>${fmt(s.created_at)}</td>
+                        <td style="max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.url || ''}</td>
+                        <td>${s.status === 'completed' ? (s.score ?? '—') + '/100' : s.status}</td>
+                        <td>${s.grade ? `<span class="${gradeClass(s.grade)}">${s.grade}</span>` : '—'}</td>
+                        <td>${s.status === 'completed'
+                            ? `<a class="hist-link" href="/results/${s.id}">View →</a>`
+                            : ''}</td>
+                    </tr>`).join('');
+                el.innerHTML = `
+                    <table class="history-table">
+                        <thead><tr><th>Date</th><th>Target</th><th>Score</th><th>Grade</th><th></th></tr></thead>
+                        <tbody>${body}</tbody>
+                    </table>`;
+            })
+            .catch(() => {
+                document.getElementById('historyBody').innerHTML =
+                    '<p class="hist-empty">Could not load scan history.</p>';
+            });
+    </script>
+</body>
+</html>

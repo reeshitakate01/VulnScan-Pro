@@ -381,6 +381,23 @@ def results_page(scan_id):
 def preview_page():
     return render_template('preview.html')
 
+@app.route('/history')
+def history_page():
+    return render_template('history.html')
+
+@app.route('/api/scans')
+def list_scans():
+    """Recent scans, newest first — powers the history dashboard."""
+    scans = ScanTask.query.order_by(ScanTask.created_at.desc()).limit(50).all()
+    return jsonify([{
+        'id': s.id,
+        'url': s.url,
+        'status': s.status,
+        'score': s.score,
+        'grade': s.grade,
+        'created_at': s.created_at.isoformat() if s.created_at else None,
+    } for s in scans])
+
 @app.route('/api/scan', methods=['POST'])
 def start_scan():
     data = request.json
