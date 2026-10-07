@@ -1,0 +1,16 @@
+services:
+  vulnscan:
+    build: .
+    container_name: vulnscan-pro
+    ports:
+      - "5000:5000"
+    environment:
+      # Keep the SSRF guard ON by default. Set SAFE_MODE=0 only to scan
+      # internal hosts you are explicitly authorised to test.
+      SAFE_MODE: "1"
+      FLASK_DEBUG: "0"
+      MAX_CONCURRENT_SCANS: "3"
+    volumes:
+      # Persist generated PDF reports on the host.
+      - ./reports:/app/reports
+    restart: unless-stopped

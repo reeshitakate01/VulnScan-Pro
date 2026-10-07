@@ -1,0 +1,21 @@
+line-length = 100
+target-version = "py310"
+
+exclude = [
+    "venv",
+    ".venv",
+    "frontend",
+    "frontend_backup",
+    "mock",
+    "docs",
+    "reports",
+    "generate_presentation.py",
+    "generate_presentation_simple.py",
+    "generate_pbl_presentation.py",
+    "convert_to_docx.py",
+]
+
+[lint]
+# Conservative: catch real errors (undefined names, syntax, broken f-strings)
+# without failing CI on legacy stylistic issues.
+select = ["E9", "F63", "F7", "F82"]

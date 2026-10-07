@@ -1,0 +1,10 @@
+# Normalise line endings so the LF/CRLF warnings stop and diffs stay clean.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.pptx binary
+*.docx binary
+*.db binary

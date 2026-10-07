@@ -1,0 +1,15 @@
+.git
+.github
+venv
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+reports/*.pdf
+*.pptx
+*.docx
+docs
+frontend_backup
+mock
+NIGHT_BUILD_REPORT.md
