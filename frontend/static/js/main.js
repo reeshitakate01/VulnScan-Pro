@@ -10,7 +10,10 @@ const modulesList = [
     { id: 'tech', name: 'Tech Fingerprinting', time: 12, checked: true },
     { id: 'js', name: 'JavaScript Analysis', time: 25, checked: true },
     { id: 'redirect', name: 'Open Redirect', time: 18, checked: true },
-    { id: 'csrf', name: 'CSRF Detection', time: 22, checked: true }
+    { id: 'csrf', name: 'CSRF Detection', time: 22, checked: true },
+    { id: 'cors', name: 'CORS', time: 4, checked: true },
+    { id: 'methods', name: 'HTTP Methods', time: 4, checked: true },
+    { id: 'recon', name: 'Recon', time: 5, checked: true }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -78,7 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
             "Open Redirect": "open_redirect",
             "CSRF Detection": "csrf_scanner",
             "JavaScript Analysis": "js_analysis",
-            "WAF Detection": "waf_detection"
+            "WAF Detection": "waf_detection",
+            "CORS": "cors_scanner",
+            "HTTP Methods": "http_methods_scanner",
+            "Recon": "recon_scanner"
         };
         const mappedModules = checkedModules.map(m => moduleMap[m]).filter(Boolean);
 

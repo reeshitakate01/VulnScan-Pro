@@ -113,6 +113,17 @@ def calculate_score(scan_results):
                 score -= deductions.get(sev, deductions["HIGH"])
                 findings_count[sev] += 1
 
+    # Config-posture modules with a unified finding shape
+    # (CORS, HTTP methods, recon). Deduct by severity for vulnerable items.
+    for modname in ("cors", "http_methods", "recon"):
+        if modname in scan_results and isinstance(scan_results[modname], list):
+            for item in scan_results[modname]:
+                if item.get("vulnerable"):
+                    sev = item.get("severity", "LOW")
+                    if sev in deductions:
+                        score -= deductions[sev]
+                        findings_count[sev] += 1
+
     # WAF Detection — a WAF is a positive security control; small bonus
     if "waf" in scan_results:
         waf_res = scan_results["waf"]

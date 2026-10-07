@@ -169,7 +169,28 @@ def bg_run_scan(scan_id, url, selected_modules, webhook_url=None, email=None):
             results["csrf"] = run_csrf_scan(forms=forms_found, base_url=url)
             csrf_count = len(results["csrf"])
             log_event(app_context, scan_id, f"CSRF scan complete. {csrf_count} finding(s).")
-            
+
+        # CORS Misconfiguration (read-only cross-origin probe)
+        if "CORS" in selected_modules:
+            log_event(app_context, scan_id, "Checking CORS configuration...")
+            from scanner.cors_scanner import run_cors_scan
+            results["cors"] = run_cors_scan(url)
+            log_event(app_context, scan_id, "CORS check complete.")
+
+        # HTTP Methods / XST (OPTIONS + TRACE only, non-destructive)
+        if "HTTP Methods" in selected_modules:
+            log_event(app_context, scan_id, "Enumerating HTTP methods...")
+            from scanner.http_methods_scanner import run_http_methods_scan
+            results["http_methods"] = run_http_methods_scan(url)
+            log_event(app_context, scan_id, "HTTP methods check complete.")
+
+        # Recon / best-practice files (security.txt)
+        if "Recon" in selected_modules:
+            log_event(app_context, scan_id, "Running recon checks...")
+            from scanner.recon_scanner import run_recon_scan
+            results["recon"] = run_recon_scan(url)
+            log_event(app_context, scan_id, "Recon checks complete.")
+
         # Scoring Let's score all modules uniformly
         log_event(app_context, scan_id, "Calculating security score...")
         score_data = calculate_score(results)
@@ -188,7 +209,21 @@ def bg_run_scan(scan_id, url, selected_modules, webhook_url=None, email=None):
         all_flattened_findings = []
         for mod, mod_res in results.items():
             mod_findings = []
-            if isinstance(mod_res, list):
+            if mod in ("cors", "http_methods", "recon") and isinstance(mod_res, list):
+                # Unified shape: {title, severity, description, recommendation,
+                # vulnerable, finding_key}. Skip purely-informational "all clear"
+                # rows so they don't pollute the findings/OWASP views.
+                for item in mod_res:
+                    if not item.get("vulnerable") and not item.get("finding_key"):
+                        continue
+                    mod_findings.append({
+                        "Finding": item.get("title", "Finding"),
+                        "Severity": item.get("severity", "INFO"),
+                        "Description": item.get("description", ""),
+                        "Recommendation": item.get("recommendation", ""),
+                        "finding_key": item.get("finding_key"),
+                    })
+            elif isinstance(mod_res, list):
                 for item in mod_res:
                     if "port" in item:
                         mod_findings.append({

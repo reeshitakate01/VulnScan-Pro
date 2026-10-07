@@ -9,7 +9,12 @@ MODULE_BASE_TIMES = {
     "tech_fingerprint":    4,   # Header + HTML analysis
     "js_analyzer":        15,   # Download + parse JS files
     "dir_bruteforce":     20,   # 200 paths checked
-    "cors_check":          3,   # Single request with Origin header
+    "cors_scanner":        3,   # Single request with Origin header
+    "http_methods_scanner": 4,  # OPTIONS + TRACE
+    "recon_scanner":       5,   # security.txt lookups
+    "waf_detection":       8,   # Baseline + probe requests
+    "open_redirect":       8,   # Redirect-param probing
+    "csrf_scanner":        6,   # Form + cookie analysis
     "robots_parser":       2,   # Fetch /robots.txt + /sitemap.xml
     "whois":               3,   # Local whois library call
 }
@@ -35,7 +40,8 @@ class TimeEstimator:
         phase1_modules = [
             "port_scanner", "header_scanner", "ssl_scanner",
             "dns_scanner", "tech_fingerprint", "robots_parser",
-            "cors_check", "whois"
+            "cors_scanner", "http_methods_scanner", "recon_scanner",
+            "waf_detection", "open_redirect", "csrf_scanner", "whois"
         ]
         
         # Phase 2: runs after crawler completes (depends on crawl output)
