@@ -1,0 +1,352 @@
+[
+    {
+        "finding_key": "missing_csp",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-693",
+        "cwe_name": "Protection Mechanism Failure",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score": 6.1,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "missing_hsts",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-319",
+        "cwe_name": "Cleartext Transmission of Sensitive Information",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score": 7.4,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "missing_xframe",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-1021",
+        "cwe_name": "Improper Restriction of Rendered UI Layers or Frames",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score": 6.1,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "missing_xcontent",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-693",
+        "cwe_name": "Protection Mechanism Failure",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+        "cvss_score": 4.3,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "server_version_leak",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-200",
+        "cwe_name": "Exposure of Sensitive Information to an Unauthorized Actor",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score": 5.3,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "cookie_no_httponly",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-1004",
+        "cwe_name": "Sensitive Cookie Without 'HttpOnly' Flag",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score": 6.1,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "cookie_no_secure",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-614",
+        "cwe_name": "Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score": 5.3,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "cookie_no_samesite",
+        "owasp_category": "A01:2021",
+        "owasp_name": "Broken Access Control",
+        "cwe": "CWE-352",
+        "cwe_name": "Cross-Site Request Forgery (CSRF)",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score": 6.1,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "reflected_xss",
+        "owasp_category": "A03:2021",
+        "owasp_name": "Injection",
+        "cwe": "CWE-79",
+        "cwe_name": "Improper Neutralization of Input During Web Page Generation",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score": 6.1,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "stored_xss",
+        "owasp_category": "A03:2021",
+        "owasp_name": "Injection",
+        "cwe": "CWE-79",
+        "cwe_name": "Improper Neutralization of Input During Web Page Generation",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N",
+        "cvss_score": 8.8,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "dom_xss",
+        "owasp_category": "A03:2021",
+        "owasp_name": "Injection",
+        "cwe": "CWE-79",
+        "cwe_name": "Improper Neutralization of Input During Web Page Generation",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score": 6.1,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "sql_injection",
+        "owasp_category": "A03:2021",
+        "owasp_name": "Injection",
+        "cwe": "CWE-89",
+        "cwe_name": "Improper Neutralization of Special Elements used in an SQL Command",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "cvss_score": 9.8,
+        "cvss_severity": "Critical"
+    },
+    {
+        "finding_key": "blind_sql_injection",
+        "owasp_category": "A03:2021",
+        "owasp_name": "Injection",
+        "cwe": "CWE-89",
+        "cwe_name": "Improper Neutralization of Special Elements used in an SQL Command",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "cvss_score": 9.8,
+        "cvss_severity": "Critical"
+    },
+    {
+        "finding_key": "expired_cert",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-298",
+        "cwe_name": "Improper Validation of Certificate Expiration",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score": 7.4,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "self_signed_cert",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-295",
+        "cwe_name": "Improper Certificate Validation",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N",
+        "cvss_score": 6.8,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "weak_tls_version",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-326",
+        "cwe_name": "Inadequate Encryption Strength",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score": 7.4,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "weak_cipher",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-327",
+        "cwe_name": "Use of a Broken or Risky Cryptographic Algorithm",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score": 7.4,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "cert_expiring_soon",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-298",
+        "cwe_name": "Improper Validation of Certificate Expiration",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score": 5.3,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "dangerous_port_open",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-923",
+        "cwe_name": "Improper Restriction of Communication Channel to Intended Endpoints",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+        "cvss_score": 7.3,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "database_port_exposed",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-923",
+        "cwe_name": "Improper Restriction of Communication Channel to Intended Endpoints",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score": 9.1,
+        "cvss_severity": "Critical"
+    },
+    {
+        "finding_key": "zone_transfer_enabled",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-200",
+        "cwe_name": "Exposure of Sensitive Information to an Unauthorized Actor",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "cvss_score": 7.5,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "missing_spf",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-183",
+        "cwe_name": "Permissive List of Allowed Inputs",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+        "cvss_score": 5.3,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "missing_dmarc",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-183",
+        "cwe_name": "Permissive List of Allowed Inputs",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+        "cvss_score": 5.3,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "aws_access_key",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-312",
+        "cwe_name": "Cleartext Storage of Sensitive Information",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "cvss_score": 9.8,
+        "cvss_severity": "Critical"
+    },
+    {
+        "finding_key": "github_token",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-312",
+        "cwe_name": "Cleartext Storage of Sensitive Information",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score": 9.1,
+        "cvss_severity": "Critical"
+    },
+    {
+        "finding_key": "generic_secret",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-798",
+        "cwe_name": "Use of Hard-coded Credentials",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "cvss_score": 8.8,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "internal_ip",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-200",
+        "cwe_name": "Exposure of Sensitive Information to an Unauthorized Actor",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score": 5.3,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "jwt_token",
+        "owasp_category": "A02:2021",
+        "owasp_name": "Cryptographic Failures",
+        "cwe": "CWE-312",
+        "cwe_name": "Cleartext Storage of Sensitive Information",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "cvss_score": 8.1,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "outdated_software",
+        "owasp_category": "A06:2021",
+        "owasp_name": "Vulnerable Components",
+        "cwe": "CWE-1104",
+        "cwe_name": "Use of Unmaintained Third Party Components",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "cvss_score": 7.5,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "cve_found",
+        "owasp_category": "A06:2021",
+        "owasp_name": "Vulnerable Components",
+        "cwe": "CWE-1035",
+        "cwe_name": "Single Sign-On (SSO) Vulnerabilities",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "cvss_score": 10.0,
+        "cvss_severity": "Critical"
+    },
+    {
+        "finding_key": "cors_wildcard",
+        "owasp_category": "A01:2021",
+        "owasp_name": "Broken Access Control",
+        "cwe": "CWE-942",
+        "cwe_name": "Permissive Cross-domain Policy with Untrusted Domains",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+        "cvss_score": 8.1,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "open_redirect",
+        "owasp_category": "A01:2021",
+        "owasp_name": "Broken Access Control",
+        "cwe": "CWE-601",
+        "cwe_name": "URL Redirection to Untrusted Site ('Open Redirect')",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score": 6.1,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "sensitive_file_exposed",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-538",
+        "cwe_name": "File and Directory Information Exposure",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "cvss_score": 7.5,
+        "cvss_severity": "High"
+    },
+    {
+        "finding_key": "hidden_field_exposed",
+        "owasp_category": "A03:2021",
+        "owasp_name": "Injection",
+        "cwe": "CWE-472",
+        "cwe_name": "Web Parameter Tampering",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+        "cvss_score": 4.3,
+        "cvss_severity": "Medium"
+    },
+    {
+        "finding_key": "email_exposed",
+        "owasp_category": "A05:2021",
+        "owasp_name": "Security Misconfiguration",
+        "cwe": "CWE-200",
+        "cwe_name": "Exposure of Sensitive Information to an Unauthorized Actor",
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score": 4.3,
+        "cvss_severity": "Medium"
+    }
+]

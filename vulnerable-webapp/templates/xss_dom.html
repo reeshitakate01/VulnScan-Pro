@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}XSS (DOM){% endblock %}
+{% block content %}
+
+<h2>DOM-Based XSS</h2>
+<p>The reflection happens purely on the client-side JavaScript. Enter a payload in the URL hash, e.g., <code>/xss-dom#&lt;script&gt;alert(1)&lt;/script&gt;</code></p>
+
+<!-- JS reads the URL hash and appends it unsanitized to the DOM -->
+<div id="greeting-box" style="padding:15px; border:1px solid #999; margin-top:20px;">
+    Hello, User!
+</div>
+
+<script>
+    // VULNERABLE DOM LOGIC
+    // Reads window.location.hash and writes innerHTML without sanitizing
+    window.onload = function() {
+        var hash = decodeURIComponent(window.location.hash.substring(1));
+        if(hash) {
+            document.getElementById("greeting-box").innerHTML = "Hello, " + hash + "!";
+        }
+    };
+</script>
+
+{% endblock %}

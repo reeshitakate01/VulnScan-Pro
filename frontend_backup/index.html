@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnScan Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: '#00ff41',
+                        darkbg: '#0a0a0a',
+                        cardbg: '#171717'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Load FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="bg-darkbg text-gray-200 font-sans antialiased min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div
+        class="w-full max-w-4xl bg-cardbg rounded-2xl border border-gray-800 shadow-2xl overflow-hidden glassmorphism relative">
+        <!-- Glow effect -->
+        <div
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-cyber opacity-5 blur-[120px] rounded-full pointer-events-none">
+        </div>
+
+        <div class="p-10 relative z-10">
+            <div class="text-center mb-10">
+                <h1
+                    class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyber to-blue-500 tracking-tight font-tech">
+                    VulnScan Pro</h1>
+                <p class="text-gray-400 mt-3 text-lg">Expose vulnerabilities before attackers do.</p>
+            </div>
+
+            <form id="scanForm" class="space-y-8">
+                <!-- URL Input -->
+                <div class="relative group">
+                    <div
+                        class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-cyber transition-colors group-focus-within:text-white">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <input type="text" id="targetUrl" placeholder="https://example.com" required
+                        class="w-full pl-12 pr-4 py-4 bg-black/50 border border-gray-700 rounded-xl text-lg text-white focus:outline-none focus:ring-2 focus:ring-cyber focus:border-transparent transition-all placeholder-gray-600 font-mono">
+                </div>
+
+                <!-- Scope Selection -->
+                <div class="bg-black/30 p-6 rounded-xl border border-gray-800">
+                    <h3
+                        class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fas fa-shield-alt"></i> Scan Modules
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <!-- WAF Detection (runs first) -->
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="WAF Detection"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">WAF
+                                Detection</span>
+                        </label>
+                        <!-- Existing modules -->
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="Port Scan"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">Port
+                                Scan</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="XSS"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">XSS</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="Security Headers"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">Security
+                                Headers</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="Crawler"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">Crawler</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="SQL Injection"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">SQL
+                                Injection</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="SSL/TLS"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">SSL/TLS</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="DNS Recon"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">DNS
+                                Recon</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="Tech Fingerprinting"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">Tech
+                                Fingerprinting</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="JavaScript Analysis"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">JavaScript
+                                Analysis</span>
+                        </label>
+                        <!-- New modules -->
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="Open Redirect"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">Open
+                                Redirect</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <input type="checkbox" name="modules" value="CSRF Detection"
+                                class="form-checkbox text-cyber bg-gray-900 border-gray-700 focus:ring-cyber rounded checkbox-anim"
+                                checked>
+                            <span
+                                class="text-gray-300 group-hover:text-white transition-colors text-sm font-medium">CSRF
+                                Detection</span>
+                        </label>
+                    </div>
+
+
+                    <!-- Time Estimate Bar -->
+                    <div
+                        class="mt-6 p-3 bg-gray-900/80 border border-gray-700 rounded-lg flex items-center justify-between group/estimate cursor-help relative">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-stopwatch text-cyber"></i>
+                            <span class="text-sm text-gray-300 font-medium">Estimated scan time: <span
+                                    id="timeEstimateText"
+                                    class="text-white font-bold font-tech tracking-wide">Calculating...</span></span>
+                        </div>
+                        <i class="fas fa-info-circle text-gray-500"></i>
+
+                        <!-- Tooltip breakdown -->
+                        <div
+                            class="absolute bottom-full left-0 mb-2 opacity-0 invisible group-hover/estimate:opacity-100 group-hover/estimate:visible transition-all duration-200 w-72 bg-black border border-gray-700 rounded-lg p-4 shadow-2xl z-50">
+                            <h4
+                                class="text-xs text-gray-400 uppercase font-bold border-b border-gray-800 pb-2 mb-2 font-tech tracking-wider">
+                                Phase Breakdown (Seconds)</h4>
+                            <div id="timeBreakdownArea" class="space-y-2 text-sm text-gray-300 font-mono mt-3">
+                                <!-- Injected by JS -->
+                            </div>
+                            <p class="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-800 italic"
+                                id="timeEstimateNote"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="bg-black/30 p-6 rounded-xl border border-gray-800 mt-4">
+                    <h3
+                        class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fas fa-bell"></i> Notifications (Optional)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="relative group">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 transition-colors group-focus-within:text-cyber">
+                                <i class="fab fa-slack"></i>
+                            </div>
+                            <input type="url" id="webhookUrl" placeholder="Slack Webhook URL"
+                                class="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyber focus:border-transparent transition-all placeholder-gray-600">
+                        </div>
+                        <div class="relative group">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 transition-colors group-focus-within:text-cyber">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <input type="email" id="emailUrl" placeholder="Email Address for Report"
+                                class="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyber focus:border-transparent transition-all placeholder-gray-600">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms & Conditions -->
+                <div class="flex items-start mt-4">
+                    <div class="flex items-center h-5">
+                        <input id="terms" type="checkbox" required
+                            class="w-4 h-4 rounded bg-gray-900 border-gray-700 text-cyber focus:ring-cyber form-checkbox mt-1">
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="terms" class="font-medium text-gray-400">Authorization Agreement</label>
+                        <p class="text-gray-500">I confirm that I have explicit permission to conduct security testing
+                            on the target URL.</p>
+                    </div>
+                </div>
+
+                <!-- Action Area -->
+                <div class="text-center pt-4">
+                    <button type="submit" id="startBtn"
+                        class="relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-black transition-all duration-200 bg-cyber border border-transparent rounded-xl hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyber focus:ring-offset-darkbg overflow-hidden group">
+                        <span class="relative z-10 flex items-center gap-2"><i class="fas fa-bolt"></i> START
+                            SCAN</span>
+                        <div
+                            class="absolute inset-0 h-full w-full scale-0 rounded-xl transition-all duration-300 group-hover:scale-100 group-hover:bg-white/20">
+                        </div>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading & Progress Area (Hidden by default) -->
+            <div id="progressArea" class="hidden mt-10 pt-8 border-t border-gray-800">
+                <div class="flex justify-between text-sm mb-2 text-gray-400 font-mono">
+                    <span id="scanStatusText">Initializing scan...</span>
+                    <!-- CSS spinner -->
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-cyber" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full bg-gray-900 rounded-full h-2.5 mb-6 overflow-hidden relative">
+                    <div id="progressBar"
+                        class="bg-cyber h-2.5 rounded-full transition-all duration-500 w-1/12 relative shadow-[0_0_10px_#00ff41]">
+                        <div class="absolute top-0 left-0 right-0 bottom-0 bg-white/20 animate-pulse"></div>
+                    </div>
+                </div>
+
+                <!-- Terminal Output -->
+                <div
+                    class="bg-black rounded-lg p-4 font-mono text-xs text-gray-300 h-48 overflow-y-auto border border-gray-800 terminal-box shadow-inner">
+                    <div id="terminalOutput" class="space-y-1">
+                        <div class="opacity-70">> Target selected. Awaiting modules initialization...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="mt-12 text-center text-gray-600 text-sm flex flex-col items-center gap-2">
+        <p>For authorized testing only.</p>
+        <p class="font-mono opacity-50 text-xs">v1.0.0-beta</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

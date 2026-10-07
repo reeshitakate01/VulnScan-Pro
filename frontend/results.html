@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Results | VulnScan Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/results.css') }}?v=1.1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+        <div class="grid-overlay" style="opacity: 0.5;"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="results-nav">
+        <div class="nav-wrapper">
+            <div class="logo-text" style="font-size: 1.5rem; margin: 0;">
+                <i class="fas fa-shield-halved logo-icon" style="font-size: 1.2rem;"></i>
+                VULNSCAN PRO
+            </div>
+            <div class="nav-actions">
+                <a href="/" class="action-btn btn-secondary">
+                    <i class="fas fa-redo"></i> NEW SCAN
+                </a>
+                <a href="/api/report/{{ scan_id }}" target="_blank" class="action-btn btn-primary" style="text-decoration:none;">
+                    <i class="fas fa-file-pdf"></i> EXPORT PDF
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading State -->
+    <div id="loadingState" style="text-align:center; padding: 5rem 0;" class="results-container">
+        <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--neon-green); margin-bottom: 1rem;"></i>
+        <p style="color: var(--text-muted); font-family: var(--font-mono);">Fetching scan results...</p>
+    </div>
+
+    <!-- Main Results Content (Hidden initially) -->
+    <main class="results-container hidden" id="dashboardContent">
+        
+        <!-- Header Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Target Card -->
+            <div class="dash-card">
+                <i class="fas fa-globe" style="position: absolute; right: -20px; top: -20px; font-size: 8rem; color: rgba(255,255,255,0.02)"></i>
+                <div>
+                    <div class="dash-label">Target Details</div>
+                    <div class="target-url" id="targetUrlText">...</div>
+                    <div class="status-row">
+                        <div class="status-dot"></div>
+                        <span>Status: <span id="scanStatusBadge" style="color:var(--text-primary); text-transform:capitalize;">...</span></span>
+                    </div>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem;">
+                    SCAN ID: {{ scan_id }}
+                </div>
+            </div>
+
+            <!-- Score Card -->
+            <div class="dash-card">
+                <div class="dash-label">Security Score</div>
+                <div class="score-flex">
+                    <div>
+                        <div class="score-main">
+                            <span class="score-num" id="scoreDisplay">0</span>
+                            <span class="score-total">/100</span>
+                        </div>
+                        <div class="score-grade" id="gradeDisplay">Grade: -</div>
+                    </div>
+                    <div class="ring-container">
+                        <svg viewBox="0 0 36 36" class="score-ring">
+                            <circle cx="18" cy="18" r="15.9" class="ring-bg"/>
+                            <circle id="scoreArc" cx="18" cy="18" r="15.9" class="ring-fill" stroke="#ef4444"/>
+                        </svg>
+                        <div class="ring-text" id="scoreRingNum">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Distribution Card -->
+            <div class="dash-card">
+                <div class="dash-label">Severity Distribution</div>
+                <div class="breakdown-list" id="findingBars"></div>
+                <div class="chart-container">
+                    <canvas id="severityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="exec-summary">
+            <div class="exec-header">
+                <i class="fas fa-file-alt" style="color: var(--neon-blue)"></i> Executive Summary
+            </div>
+            <p class="exec-text" id="summaryText">...</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('findings', this)">DETAILED FINDINGS</button>
+            <button class="tab-btn" onclick="switchTab('modules', this)">BY MODULE</button>
+            <button class="tab-btn" onclick="switchTab('owasp', this)">OWASP MAPPING</button>
+        </div>
+
+        <!-- Tab Content: Findings -->
+        <div id="tab-findings" class="tab-content active">
+            <div class="findings-list" id="findingsContainer"></div>
+        </div>
+
+        <!-- Tab Content: Modules -->
+        <div id="tab-modules" class="tab-content">
+            <div class="module-cards" id="modulesContainer"></div>
+        </div>
+
+        <!-- Tab Content: OWASP -->
+        <div id="tab-owasp" class="tab-content">
+            <div class="owasp-cards" id="owaspContainer"></div>
+        </div>
+
+    </main>
+
+    <script>
+        window.SCAN_ID = "{{ scan_id }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/results.js') }}?v=1.1"></script>
+</body>
+</html>

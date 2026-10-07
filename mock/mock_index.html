@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VulnScan Pro — Mock Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyber:  '#00ff41',
+            darkbg: '#080c0a',
+            cardbg: '#101510',
+            border:  '#1e2e1e',
+          },
+          fontFamily: {
+            tech: ['"Share Tech Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glow-text { text-shadow: 0 0 30px rgba(0,255,65,0.4); }
+    .module-card { transition: all .2s ease; border: 1px solid #1e2e1e; }
+    .module-card:hover { border-color: #00ff4155; background: #0d1a0d; transform: translateY(-1px); }
+    .module-card.selected { border-color: #00ff41; background: #0a150a; }
+    .module-card.selected .mod-check { background: #00ff41; border-color: #00ff41; }
+    .module-card.selected .mod-check i { opacity: 1; }
+    .mod-check { transition: all .15s; }
+    .mod-check i { opacity: 0; transition: opacity .15s; }
+    .terminal-line { animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateX(-4px); } to { opacity:1; transform:translateX(0); } }
+    .progress-glow { box-shadow: 0 0 12px #00ff41, 0 0 24px #00ff4166; }
+    .scan-btn { background: linear-gradient(135deg, #00ff41, #00cc33); transition: all .2s; }
+    .scan-btn:hover { box-shadow: 0 0 20px #00ff4188; transform: translateY(-1px); }
+    .scan-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .badge-critical { background:#ef444422; color:#ef4444; border:1px solid #ef444444; }
+    .badge-high     { background:#f9731622; color:#f97316; border:1px solid #f9731644; }
+    .badge-medium   { background:#eab30822; color:#eab308; border:1px solid #eab30844; }
+    .badge-low      { background:#38bdf822; color:#38bdf8; border:1px solid #38bdf844; }
+    .badge-info     { background:#9ca3af22; color:#9ca3af; border:1px solid #9ca3af44; }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:#080c0a; } ::-webkit-scrollbar-thumb { background:#1e2e1e; border-radius:3px; }
+  </style>
+</head>
+
+<body class="bg-darkbg text-gray-200 min-h-screen flex flex-col">
+
+  <!-- ── NAV ── -->
+  <nav class="border-b border-border bg-black/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-shield-virus text-cyber text-xl"></i>
+        <span class="font-tech text-white font-bold tracking-widest text-lg">VULNSCAN <span class="text-cyber">PRO</span></span>
+      </div>
+      <div class="flex items-center gap-3 text-xs text-gray-500 font-tech">
+        <span class="w-2 h-2 rounded-full bg-cyber animate-pulse inline-block"></span>
+        SYSTEM ONLINE
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <main class="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
+
+    <!-- Hero -->
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyber via-green-300 to-blue-400 tracking-tight glow-text mb-3">
+        Vulnerability Scanner
+      </h1>
+      <p class="text-gray-400 text-lg">Expose attack surface before adversaries do.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- ── LEFT: FORM ── -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Target URL -->
+        <div class="bg-cardbg border border-border rounded-2xl p-6">
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
+            <i class="fas fa-crosshairs text-cyber mr-2"></i>Target URL
+          </label>
+          <div class="relative">
+            <input id="targetUrl" type="text" placeholder="https://example.com"
+              class="w-full bg-black/60 border border-border rounded-xl px-4 py-3.5 text-white font-tech text-sm placeholder-gray-700 focus:outline-none focus:border-cyber focus:ring-1 focus:ring-cyber transition-all"/>
+            <div id="urlStatus" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm hidden">
+              <i class="fas fa-check-circle text-cyber"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scan Modules -->
+        <div class="bg-cardbg border border-border rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-5">
+            <label class="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+              <i class="fas fa-cubes text-cyber mr-2"></i>Scan Modules
+            </label>
+            <div class="flex gap-2">
+              <button onclick="selectAll()" class="text-xs text-cyber hover:text-green-300 font-tech px-2 py-1 border border-border rounded hover:border-cyber transition-all">ALL</button>
+              <button onclick="selectNone()" class="text-xs text-gray-500 hover:text-gray-300 font-tech px-2 py-1 border border-border rounded hover:border-gray-500 transition-all">NONE</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="moduleGrid">
+            <!-- cards injected by JS -->
+          </div>
+
+          <!-- Time Estimate -->
+          <div class="mt-5 flex items-center justify-between bg-black/40 border border-border rounded-xl px-4 py-3">
+            <div class="flex items-center gap-3 text-sm">
+              <i class="fas fa-stopwatch text-cyber"></i>
+              <span class="text-gray-400">Est. duration:</span>
+              <span id="timeEst" class="text-white font-tech font-bold">~2–4 min</span>
+            </div>
+            <span class="text-xs text-gray-600 font-tech" id="moduleCount">12 modules</span>
+          </div>
+        </div>
+
+        <!-- Notifications (collapsed by default) -->
+        <details class="bg-cardbg border border-border rounded-2xl group">
+          <summary class="px-6 py-4 flex items-center justify-between cursor-pointer list-none">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+              <i class="fas fa-bell mr-2"></i>Notifications <span class="text-gray-700 font-normal normal-case tracking-normal">(optional)</span>
+            </span>
+            <i class="fas fa-chevron-down text-gray-600 text-xs transition-transform group-open:rotate-180"></i>
+          </summary>
+          <div class="px-6 pb-5 grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-4">
+            <div class="relative">
+              <i class="fab fa-slack absolute left-3 top-1/2 -translate-y-1/2 text-gray-600"></i>
+              <input type="url" placeholder="Slack Webhook URL"
+                class="w-full bg-black/60 border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-700 focus:outline-none focus:border-cyber transition-all"/>
+            </div>
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-600"></i>
+              <input type="email" placeholder="Email for report"
+                class="w-full bg-black/60 border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-700 focus:outline-none focus:border-cyber transition-all"/>
+            </div>
+          </div>
+        </details>
+
+        <!-- Auth + Start -->
+        <div class="bg-cardbg border border-border rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="terms"
+              class="mt-0.5 w-4 h-4 rounded bg-black border-gray-700 text-cyber focus:ring-cyber"/>
+            <div>
+              <span class="text-sm font-medium text-gray-300">Authorization Agreement</span>
+              <p class="text-xs text-gray-600 mt-0.5">I have explicit permission to scan the target.</p>
+            </div>
+          </label>
+          <button id="startBtn" onclick="startScan()"
+            class="scan-btn text-black font-bold px-8 py-3.5 rounded-xl text-sm tracking-wide flex items-center gap-2 shrink-0">
+            <i class="fas fa-bolt"></i> START SCAN
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── RIGHT: SIDEBAR ── -->
+      <div class="space-y-6">
+
+        <!-- Scan Profile -->
+        <div class="bg-cardbg border border-border rounded-2xl p-5">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Scan Profile</h3>
+          <div class="space-y-2">
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input type="radio" name="profile" value="full" checked class="text-cyber focus:ring-cyber"/>
+              <div>
+                <span class="text-sm text-gray-300 group-hover:text-white transition-colors">Full Scan</span>
+                <p class="text-xs text-gray-600">All modules active</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input type="radio" name="profile" value="quick" class="text-cyber focus:ring-cyber"/>
+              <div>
+                <span class="text-sm text-gray-300 group-hover:text-white transition-colors">Quick Scan</span>
+                <p class="text-xs text-gray-600">Headers, SSL, DNS only</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input type="radio" name="profile" value="web" class="text-cyber focus:ring-cyber"/>
+              <div>
+                <span class="text-sm text-gray-300 group-hover:text-white transition-colors">Web App Only</span>
+                <p class="text-xs text-gray-600">XSS, SQLi, CSRF, Redirect</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Severity Legend -->
+        <div class="bg-cardbg border border-border rounded-2xl p-5">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Severity Legend</h3>
+          <div class="space-y-2 text-xs font-tech">
+            <div class="flex items-center justify-between"><span class="badge-critical px-2 py-0.5 rounded text-xs">CRITICAL</span><span class="text-gray-500">-25 pts</span></div>
+            <div class="flex items-center justify-between"><span class="badge-high px-2 py-0.5 rounded text-xs">HIGH</span><span class="text-gray-500">-15 pts</span></div>
+            <div class="flex items-center justify-between"><span class="badge-medium px-2 py-0.5 rounded text-xs">MEDIUM</span><span class="text-gray-500">-8 pts</span></div>
+            <div class="flex items-center justify-between"><span class="badge-low px-2 py-0.5 rounded text-xs">LOW</span><span class="text-gray-500">-3 pts</span></div>
+            <div class="flex items-center justify-between"><span class="badge-info px-2 py-0.5 rounded text-xs">INFO</span><span class="text-gray-500">-1 pt</span></div>
+          </div>
+          <p class="text-xs text-gray-600 mt-3 border-t border-border pt-3">Base score: 100. WAF detected: +5 bonus.</p>
+        </div>
+
+        <!-- Recent Scans -->
+        <div class="bg-cardbg border border-border rounded-2xl p-5">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Recent Scans</h3>
+          <div class="space-y-3" id="recentScans">
+            <div class="flex items-center justify-between text-xs">
+              <div>
+                <p class="text-gray-300 font-tech truncate w-36">localhost:5001</p>
+                <p class="text-gray-600">2 min ago</p>
+              </div>
+              <span class="badge-high px-2 py-0.5 rounded text-xs font-bold">42 — F</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <div>
+                <p class="text-gray-300 font-tech truncate w-36">example.com</p>
+                <p class="text-gray-600">1 hr ago</p>
+              </div>
+              <span class="badge-medium px-2 py-0.5 rounded text-xs font-bold">71 — C</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <div>
+                <p class="text-gray-300 font-tech truncate w-36">testsite.local</p>
+                <p class="text-gray-600">Yesterday</p>
+              </div>
+              <span style="background:#00ff4122;color:#00ff41;border:1px solid #00ff4144" class="px-2 py-0.5 rounded text-xs font-bold">88 — B</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PROGRESS PANEL (hidden by default) ── -->
+    <div id="progressPanel" class="hidden mt-8 bg-cardbg border border-border rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-gray-300 flex items-center gap-2">
+          <i class="fas fa-spinner fa-spin text-cyber"></i>
+          <span id="progressLabel">Initializing...</span>
+        </h3>
+        <span id="progressPct" class="text-cyber font-tech text-sm font-bold">0%</span>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-black/60 rounded-full h-2 mb-6 overflow-hidden">
+        <div id="progressBar" class="h-2 rounded-full transition-all duration-700 progress-glow" style="width:0%;background:#00ff41"></div>
+      </div>
+
+      <!-- Module Status Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-6" id="moduleStatusGrid"></div>
+
+      <!-- Terminal -->
+      <div class="bg-black/70 border border-border rounded-xl p-4 h-44 overflow-y-auto font-tech text-xs">
+        <div id="terminal" class="space-y-1 text-gray-400">
+          <div class="terminal-line text-gray-600">> VulnScan Pro initializing...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-border text-center py-5 text-xs text-gray-700 font-tech">
+    FOR AUTHORIZED TESTING ONLY &nbsp;|&nbsp; VULNSCAN PRO v2.0
+  </footer>
+
+<script>
+const MODULES = [
+  { name:"WAF Detection",      value:"WAF Detection",      icon:"fa-shield-alt",      tag:"INFRA",    severity:"info",   time:8  },
+  { name:"Port Scanner",       value:"Port Scan",           icon:"fa-network-wired",   tag:"INFRA",    severity:"high",   time:15 },
+  { name:"Security Headers",   value:"Security Headers",    icon:"fa-heading",         tag:"HTTP",     severity:"medium", time:5  },
+  { name:"SSL / TLS",          value:"SSL/TLS",             icon:"fa-lock",            tag:"CRYPTO",   severity:"medium", time:8  },
+  { name:"DNS Recon",          value:"DNS Recon",           icon:"fa-server",          tag:"DNS",      severity:"medium", time:10 },
+  { name:"Crawler",            value:"Crawler",             icon:"fa-spider",          tag:"WEB",      severity:"info",   time:20 },
+  { name:"XSS",                value:"XSS",                 icon:"fa-code",            tag:"INJECT",   severity:"high",   time:30 },
+  { name:"SQL Injection",      value:"SQL Injection",       icon:"fa-database",        tag:"INJECT",   severity:"critical",time:45 },
+  { name:"CSRF Detection",     value:"CSRF Detection",      icon:"fa-exchange-alt",    tag:"WEB",      severity:"high",   time:15 },
+  { name:"Open Redirect",      value:"Open Redirect",       icon:"fa-external-link-alt",tag:"WEB",    severity:"medium", time:12 },
+  { name:"Tech Fingerprinting",value:"Tech Fingerprinting", icon:"fa-fingerprint",     tag:"RECON",   severity:"info",   time:6  },
+  { name:"JavaScript Analysis",value:"JavaScript Analysis", icon:"fa-js",              tag:"CODE",    severity:"high",   time:20 },
+];
+
+const SEVERITY_COLORS = {
+  critical: 'text-red-400 border-red-900 bg-red-950/40',
+  high:     'text-orange-400 border-orange-900 bg-orange-950/40',
+  medium:   'text-yellow-400 border-yellow-900 bg-yellow-950/40',
+  low:      'text-sky-400 border-sky-900 bg-sky-950/40',
+  info:     'text-gray-400 border-gray-800 bg-gray-900/40',
+};
+
+let selectedModules = new Set(MODULES.map(m => m.value));
+
+function renderModules() {
+  const grid = document.getElementById('moduleGrid');
+  grid.innerHTML = MODULES.map(m => {
+    const sel = selectedModules.has(m.value);
+    return `
+    <div class="module-card ${sel?'selected':''} rounded-xl p-3.5 cursor-pointer flex items-center gap-3"
+         onclick="toggleModule('${m.value}', this)">
+      <div class="mod-check w-5 h-5 rounded border border-gray-700 flex items-center justify-center shrink-0">
+        <i class="fas fa-check text-black text-xs"></i>
+      </div>
+      <i class="fas ${m.icon} text-cyber w-4 text-center shrink-0"></i>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm text-gray-200 font-medium leading-tight">${m.name}</p>
+        <span class="text-xs text-gray-600 font-tech">${m.tag}</span>
+      </div>
+      <span class="text-xs font-tech px-1.5 py-0.5 rounded border ${SEVERITY_COLORS[m.severity]} shrink-0">${m.severity.toUpperCase()}</span>
+    </div>`;
+  }).join('');
+  updateStats();
+}
+
+function toggleModule(val, el) {
+  if (selectedModules.has(val)) selectedModules.delete(val);
+  else selectedModules.add(val);
+  el.classList.toggle('selected');
+  el.querySelector('.mod-check').classList.toggle('bg-cyber');
+  el.querySelector('.mod-check i').style.opacity = selectedModules.has(val) ? '1' : '0';
+  updateStats();
+}
+
+function selectAll()  { selectedModules = new Set(MODULES.map(m=>m.value)); renderModules(); }
+function selectNone() { selectedModules.clear(); renderModules(); }
+
+function updateStats() {
+  const count = selectedModules.size;
+  const total = MODULES.filter(m=>selectedModules.has(m.value)).reduce((a,m)=>a+m.time,0);
+  document.getElementById('moduleCount').textContent = `${count} module${count!==1?'s':''}`;
+  const mins = Math.floor(total/60), secs = total%60;
+  document.getElementById('timeEst').textContent = mins ? `~${mins}m ${secs}s` : `~${secs}s`;
+}
+
+function startScan() {
+  const url = document.getElementById('targetUrl').value.trim();
+  const terms = document.getElementById('terms').checked;
+  if (!url) { flash('Enter a target URL.'); return; }
+  if (!url.startsWith('http')) { flash('URL must start with http:// or https://'); return; }
+  if (!terms) { flash('Accept the authorization agreement.'); return; }
+  if (selectedModules.size === 0) { flash('Select at least one module.'); return; }
+
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('progressPanel').classList.remove('hidden');
+  document.getElementById('progressPanel').scrollIntoView({ behavior:'smooth', block:'start' });
+
+  buildModuleStatusGrid();
+  simulateScan();
+}
+
+function flash(msg) {
+  const el = document.createElement('div');
+  el.className = 'fixed top-4 right-4 bg-red-900/90 border border-red-700 text-red-300 text-sm px-4 py-3 rounded-xl shadow-lg z-50 font-tech';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function buildModuleStatusGrid() {
+  const mods = MODULES.filter(m => selectedModules.has(m.value));
+  document.getElementById('moduleStatusGrid').innerHTML = mods.map(m => `
+    <div id="ms_${m.value.replace(/\s/g,'_')}" class="flex items-center gap-2 bg-black/40 border border-border rounded-lg px-3 py-2">
+      <i class="fas fa-circle text-gray-700 text-xs" id="msi_${m.value.replace(/\s/g,'_')}"></i>
+      <span class="text-xs text-gray-500 truncate font-tech">${m.name}</span>
+    </div>`).join('');
+}
+
+function log(msg, cls='text-gray-400') {
+  const t = document.getElementById('terminal');
+  const d = document.createElement('div');
+  d.className = `terminal-line ${cls}`;
+  d.innerHTML = '> ' + msg;
+  t.appendChild(d);
+  t.parentElement.scrollTop = t.parentElement.scrollHeight;
+}
+
+async function simulateScan() {
+  const mods = MODULES.filter(m => selectedModules.has(m.value));
+  const bar = document.getElementById('progressBar');
+  const pct = document.getElementById('progressPct');
+  const lbl = document.getElementById('progressLabel');
+  let progress = 0;
+
+  function setProgress(p, label) {
+    progress = Math.min(p, 100);
+    bar.style.width = progress + '%';
+    pct.textContent = Math.round(progress) + '%';
+    if (label) lbl.textContent = label;
+  }
+
+  function markModule(val, done) {
+    const id = 'msi_' + val.replace(/\s/g,'_');
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (done) { el.className = 'fas fa-check-circle text-cyber text-xs'; }
+    else { el.className = 'fas fa-circle-notch fa-spin text-yellow-400 text-xs'; }
+  }
+
+  log(`Target: ${document.getElementById('targetUrl').value}`, 'text-cyber');
+  log(`Modules: ${mods.length} selected`);
+  await delay(400);
+
+  setProgress(2, 'Starting scan...');
+
+  for (let i = 0; i < mods.length; i++) {
+    const m = mods[i];
+    markModule(m.value, false);
+    log(`Running ${m.name}...`);
+    setProgress(5 + (i / mods.length) * 85, `Running: ${m.name}`);
+    await delay(600 + Math.random() * 500);
+
+    // fake result logs
+    const fakes = fakeResults[m.value];
+    if (fakes) { const r = fakes[Math.floor(Math.random()*fakes.length)]; log(r.msg, r.cls); }
+
+    markModule(m.value, true);
+    await delay(200);
+  }
+
+  log('Scoring results...', 'text-yellow-400');
+  setProgress(95, 'Scoring...');
+  await delay(600);
+
+  log('Generating PDF report...', 'text-yellow-400');
+  setProgress(98, 'Generating report...');
+  await delay(700);
+
+  setProgress(100, 'Scan complete!');
+  log('Scan complete! <a href="mock_results.html" class="text-cyber underline">View Results →</a>', 'text-cyber font-bold');
+}
+
+const fakeResults = {
+  "WAF Detection": [
+    {msg:"No WAF detected on target.", cls:"text-orange-400"},
+    {msg:"Cloudflare WAF detected. +5 score bonus.", cls:"text-cyber"},
+  ],
+  "Port Scan": [
+    {msg:"Open: 80/HTTP, 443/HTTPS, 22/SSH", cls:"text-orange-400"},
+    {msg:"Open: 80/HTTP, 3306/MySQL — DATABASE EXPOSED", cls:"text-red-400"},
+  ],
+  "Security Headers": [
+    {msg:"Missing: CSP, HSTS, X-Frame-Options", cls:"text-orange-400"},
+    {msg:"All headers present.", cls:"text-cyber"},
+  ],
+  "SSL/TLS": [
+    {msg:"Certificate valid. Expires in 82 days.", cls:"text-cyber"},
+    {msg:"Weak cipher TLS_RSA_WITH_RC4_128_SHA found.", cls:"text-orange-400"},
+  ],
+  "DNS Recon": [
+    {msg:"SPF: present. DMARC: missing.", cls:"text-yellow-400"},
+    {msg:"Zone transfer REFUSED. SPF/DKIM/DMARC all present.", cls:"text-cyber"},
+  ],
+  "Crawler": [
+    {msg:"Crawled 24 pages, 7 forms, 3 JS files.", cls:"text-gray-300"},
+    {msg:"Found /.env exposed! (CRITICAL)", cls:"text-red-400"},
+  ],
+  "XSS": [
+    {msg:"XSS found in /search?q= via event handler payload.", cls:"text-red-400"},
+    {msg:"No XSS vulnerabilities detected.", cls:"text-cyber"},
+  ],
+  "SQL Injection": [
+    {msg:"SQLi (time-based blind) in /login — username param.", cls:"text-red-400"},
+    {msg:"No SQL injection detected.", cls:"text-cyber"},
+  ],
+  "CSRF Detection": [
+    {msg:"POST /transfer missing CSRF token.", cls:"text-orange-400"},
+    {msg:"JS fetch() to /api/update lacks X-CSRFToken header.", cls:"text-orange-400"},
+  ],
+  "Open Redirect": [
+    {msg:"Open redirect: /redirect?next=https://evil.com", cls:"text-orange-400"},
+    {msg:"No open redirects found.", cls:"text-cyber"},
+  ],
+  "Tech Fingerprinting": [
+    {msg:"Flask/2.3.2, Python/3.11. No known CVEs.", cls:"text-gray-300"},
+    {msg:"jQuery 1.6.4 detected — CVE-2019-11358.", cls:"text-orange-400"},
+  ],
+  "JavaScript Analysis": [
+    {msg:"Hardcoded AWS key found in main.bundle.js", cls:"text-red-400"},
+    {msg:"No secrets found in JS files.", cls:"text-cyber"},
+  ],
+};
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+renderModules();
+</script>
+</body>
+</html>

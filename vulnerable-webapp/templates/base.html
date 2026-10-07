@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnApp - {% block title %}{% endblock %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; }
+        .banner { background-color: #ff0000; color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 1.2em; border-bottom: 2px solid #8B0000; }
+        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .nav { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .footer { margin-top: 50px; font-size: 0.8em; color: #666; text-align: center; border-top: 1px solid #ccc; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- CRITICAL VULNERABLE TEST BED MARKER -->
+    <div class="banner">
+        ⚠️ VULNERABLE TEST SERVER - DO NOT EXPOSE TO INTERNET ⚠️
+    </div>
+
+    <!-- Hidden admin hint -->
+    <!-- TODO: Backup admin panel located at /hidden-admin -->
+
+    <div class="container">
+        <div class="nav">
+            <a href="/">Home</a> | 
+            <a href="/login">SQLi Login</a> | 
+            <a href="/vulnerable-form">Reflected XSS</a> | 
+            <a href="/xss-stored">Stored XSS</a> | 
+            <a href="/xss-dom">DOM XSS</a> | 
+            <a href="/csrf">CSRF</a> | 
+            <a href="/upload">Upload</a> | 
+            <a href="/info-leak">Info Leaks</a>
+        </div>
+
+        {% block content %}{% endblock %}
+
+        <div class="footer">
+            <p>Powered by VulnerableServer. Designed for VulnScan Pro testing.</p>
+        </div>
+    </div>
+    
+    <!-- Load simulated secrets script to trigger JS Analyzer -->
+    <script src="/static/js/secrets.js"></script>
+</body>
+</html>

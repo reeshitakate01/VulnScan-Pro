@@ -1,0 +1,13 @@
+flask
+flask-cors
+requests
+beautifulsoup4
+dnspython
+reportlab
+sqlalchemy
+flask-sqlalchemy
+python-whois
+playwright
+concurrent-log-handler
+uuid
+jsbeautifier>=1.14.0

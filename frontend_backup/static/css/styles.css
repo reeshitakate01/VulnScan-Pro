@@ -1,0 +1,62 @@
+/* styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Share+Tech+Mono&display=swap');
+
+body {
+    background-image: 
+        radial-gradient(circle at 50% 0%, #111 0%, transparent 70%),
+        linear-gradient(to bottom, #0a0a0a, #050505);
+    background-attachment: fixed;
+}
+
+.font-tech {
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.glassmorphism {
+    background: rgba(23, 23, 23, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.checkbox-anim {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.checkbox-anim:checked {
+    animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 4px rgba(0, 255, 65, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 65, 0);
+    }
+}
+
+.terminal-box {
+    scrollbar-width: thin;
+    scrollbar-color: #333 #000;
+}
+.terminal-box::-webkit-scrollbar {
+    width: 8px;
+}
+.terminal-box::-webkit-scrollbar-track {
+    background: #000;
+}
+.terminal-box::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 4px;
+}
+
+.log-line {
+    animation: fade-in 0.3s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes fade-in {
+    to { opacity: 1; }
+}

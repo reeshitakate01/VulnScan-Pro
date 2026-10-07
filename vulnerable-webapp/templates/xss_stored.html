@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}XSS (Stored){% endblock %}
+{% block content %}
+
+<h2>Stored XSS - Guestbook</h2>
+<p>Leave a message. The database stores the message exactly as-is and renders it unprotected when viewed.</p>
+
+<form method="POST" action="/xss-stored">
+    <label>Name:</label>
+    <br><input type="text" name="name" required>
+    <br><label>Message:</label>
+    <br><textarea name="message" rows="4" cols="50" required></textarea>
+    <br><button type="submit" style="margin-top:10px;">Post Message</button>
+</form>
+
+<hr>
+<h3>Messages:</h3>
+{% for msg in messages %}
+    <div style="border:1px dashed #ccc; padding:10px; margin-bottom:10px;">
+        <!-- VULNERABILITY SINK: RAW DB OUTPUT without Jinja 'e' filter -->
+        <strong>{{ msg.name | safe }}</strong> says:<br>
+        {{ msg.message | safe }}
+    </div>
+{% endfor %}
+
+{% endblock %}

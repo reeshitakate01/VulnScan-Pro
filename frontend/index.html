@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnScan Pro - Advanced Security Framework</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=1.1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <main class="container">
+        <header class="app-header">
+            <h1 class="logo-text">
+                <i class="fas fa-shield-halved logo-icon"></i>
+                VulnScan Pro
+            </h1>
+            <p class="subtitle">Next-Generation Vulnerability Intelligence</p>
+        </header>
+
+        <div class="glass-panel main-panel">
+            <form id="scanForm" class="scan-form">
+                
+                <!-- Target Input -->
+                <div class="input-group target-input-group">
+                    <div class="input-icon">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <input type="url" id="targetUrl" class="cyber-input" placeholder="Enter target URL (e.g., https://example.com) ..." required>
+                    <div class="input-glow"></div>
+                </div>
+
+                <!-- Modules Selection -->
+                <section class="modules-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-layer-group"></i> Active Scan Modules</h2>
+                        <span class="module-count">12 Selected</span>
+                    </div>
+
+                    <div class="modules-grid">
+                        <!-- Module items injected via JS for cleaner HTML -->
+                    </div>
+
+                    <!-- Time Estimate -->
+                    <div class="time-estimate-container tooltip-trigger">
+                        <div class="eta-content">
+                            <i class="fas fa-stopwatch eta-icon"></i>
+                            <span class="eta-label">Estimated Scan Duration:</span>
+                            <span class="eta-value" id="timeEstimateText">Calculating...</span>
+                        </div>
+                        <i class="fas fa-circle-info info-icon"></i>
+                        <div class="tooltip-content">
+                            <h4>Phase Breakdown</h4>
+                            <ul id="timeBreakdownArea" class="phase-list">
+                                <!-- Injected via JS -->
+                            </ul>
+                            <div id="timeEstimateNote" class="text-xs text-green-400 mt-2"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Notifications -->
+                <section class="notifications-section">
+                    <div class="section-header borderless">
+                        <h2><i class="fas fa-bell"></i> Alert Routing (Optional)</h2>
+                    </div>
+                    <div class="notif-grid">
+                        <div class="input-group small">
+                            <div class="input-icon"><i class="fab fa-slack"></i></div>
+                            <input type="url" id="webhookUrl" class="cyber-input small-input" placeholder="Slack Webhook URL">
+                        </div>
+                        <div class="input-group small">
+                            <div class="input-icon"><i class="fas fa-envelope"></i></div>
+                            <input type="email" id="emailUrl" class="cyber-input small-input" placeholder="Report Delivery Email">
+                        </div>
+                    </div>
+                </section>
+
+                <div class="actions-section">
+                    <label class="cyber-checkbox-label inline-auth">
+                        <input type="checkbox" id="terms" class="cyber-checkbox" required>
+                        <div class="checkbox-box"></div>
+                        <span class="checkbox-text">I confirm authorization to perform security testing on this target.</span>
+                    </label>
+
+                    <button type="submit" class="cyber-button primary-action" id="startBtn">
+                        <span class="btn-content">
+                            <i class="fas fa-bolt"></i> INITIATE SCAN SEQUENCE
+                        </span>
+                        <div class="btn-glare"></div>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Scan Progress Area (Hidden initially) -->
+            <div id="progressArea" class="progress-area hidden">
+                <div class="progress-header">
+                    <div class="status-indicator">
+                        <div class="spinner"></div>
+                        <span id="scanStatusText">Establishing secure connection...</span>
+                    </div>
+                    <div class="progress-percentage">0%</div>
+                </div>
+
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressBar"></div>
+                    <div class="progress-glow" id="progressGlow"></div>
+                </div>
+
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="term-dots"><span></span><span></span><span></span></div>
+                        <span class="term-title">Execution Log</span>
+                    </div>
+                    <div class="terminal-body" id="terminalOutput">
+                        <div class="term-line timestamp">> [SYS] Engine initialized. Awaiting modules...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <p>For authorized internal and contracted security evaluations only. <span class="version">v2.0.0</span></p>
+        </footer>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=1.1"></script>
+</body>
+</html>

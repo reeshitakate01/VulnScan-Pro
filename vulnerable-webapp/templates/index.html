@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h2>Welcome to the VulnApp Test Server</h2>
+<p>This is a deliberately vulnerable web application designed specifically for backtesting VulnScan Pro modules.</p>
+
+<p>Use the navigation links above to explore the different vulnerability sinks.</p>
+
+<h3>Active Traps Loaded:</h3>
+<ul>
+    <li><b>Reflected XSS:</b> Inputs echoed safely inside a template unescaped.</li>
+    <li><b>Stored XSS:</b> SQLite persistent payload delivery.</li>
+    <li><b>DOM XSS:</b> Purely client-side manipulation.</li>
+    <li><b>SQL Injection:</b> Plaintext DB using string concat, dumping raw errors to the frontend.</li>
+    <li><b>Information Leakage:</b> Sensitive simulated backend files exposed directly to Crawler.</li>
+</ul>
+
+<!-- Link to out-of-date library for Tech Fingerprinting -->
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+{% endblock %}

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results | VulnScan Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: '#00ff41',
+                        darkbg: '#0a0a0a',
+                        cardbg: '#171717',
+                        critical: '#ef4444',
+                        high: '#f97316',
+                        medium: '#eab308',
+                        low: '#38bdf8',
+                        info: '#9ca3af'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-darkbg text-gray-200 font-sans antialiased min-h-screen">
+
+    <!-- Top Nav -->
+    <nav class="border-b border-gray-800 bg-black/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-shield-virus text-cyber text-2xl"></i>
+                    <span class="font-tech text-white font-bold text-xl tracking-wide">VulnScan <span
+                            class="text-cyber">Pro</span></span>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/"
+                        class="text-gray-400 hover:text-white transition rounded-md px-3 py-2 font-medium bg-gray-900 border border-gray-700 hover:border-gray-500">
+                        <i class="fas fa-redo mr-2"></i>New Scan
+                    </a>
+                    <a href="/api/report/{{ scan_id }}" target="_blank"
+                        class="text-black bg-cyber hover:bg-green-400 transition rounded-md px-4 py-2 font-bold focus:outline-none focus:ring-2 focus:ring-cyber">
+                        <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Loading State -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+            <i class="fas fa-circle-notch fa-spin text-cyber text-5xl mb-4"></i>
+            <p class="text-gray-400 text-lg">Fetching scan results...</p>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboardContent" class="hidden space-y-6">
+
+            <!-- Summary Header Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Target Info -->
+                <div
+                    class="bg-cardbg rounded-xl border border-gray-800 p-6 flex flex-col justify-between shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 text-gray-800/20 text-9xl pointer-events-none">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 font-semibold mb-1 uppercase tracking-wider text-xs">Target Details
+                        </h3>
+                        <p id="targetUrlText" class="text-xl text-white font-mono break-all font-bold">...</p>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-gray-500 text-sm">Status: <span id="scanStatusBadge"
+                                class="text-cyber capitalize font-semibold">...</span></p>
+                    </div>
+                </div>
+
+                <!-- Score Card -->
+                <div
+                    class="bg-cardbg rounded-xl border border-gray-800 p-6 flex items-center justify-between shadow-lg relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyber/10 to-transparent pointer-events-none">
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 font-semibold mb-1 uppercase tracking-wider text-xs">Security Score
+                        </h3>
+                        <div class="flex items-baseline gap-2">
+                            <span id="scoreValue" class="text-6xl font-black text-white font-tech">0</span>
+                            <span class="text-gray-500 text-xl font-tech">/100</span>
+                        </div>
+                        <p id="scoreGrade"
+                            class="mt-2 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyber to-blue-400">
+                            Grade: -</p>
+                    </div>
+                    <div class="h-24 w-24 relative">
+                        <!-- Score Ring Chart Canvas -->
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Findings Summary Card -->
+                <div class="bg-cardbg rounded-xl border border-gray-800 p-6 shadow-lg">
+                    <h3
+                        class="text-gray-400 font-semibold mb-4 uppercase tracking-wider text-xs border-b border-gray-800 pb-2">
+                        Findings Summary</h3>
+                    <div class="space-y-3" id="findingCountsArea">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Executive Summary Text -->
+            <div class="bg-cardbg rounded-xl border border-gray-800 p-6 shadow-lg">
+                <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                    <i class="fas fa-file-alt text-gray-500"></i> Executive Summary
+                </h3>
+                <p id="summaryText" class="text-gray-300 leading-relaxed">...</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="border-b border-gray-800 mb-6">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs" id="resultTabs">
+                    <button
+                        class="tab-button border-cyber text-cyber whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg font-tech active"
+                        data-target="modulesTab">Modules</button>
+                    <button
+                        class="tab-button border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg font-tech"
+                        data-target="owaspTab">OWASP Mapping</button>
+                </nav>
+            </div>
+
+            <!-- Detailed Modules Section -->
+            <div id="modulesTab" class="tab-content">
+                <div id="modulesContainer" class="space-y-4">
+                    <!-- Modules injected here -->
+                </div>
+            </div>
+
+            <!-- OWASP Section -->
+            <div id="owaspTab" class="tab-content hidden">
+                <div id="owaspContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- OWASP cards injected here -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Passing ID to JS nicely -->
+    <script>
+        window.SCAN_ID = "{{ scan_id }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/results.js') }}"></script>
+</body>
+
+</html>

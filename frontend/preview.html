@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnScan Pro — UI Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: '#00ff41',
+                        darkbg: '#0a0a0a',
+                        cardbg: '#111111',
+                        cardbg2: '#161616',
+                    },
+                    fontFamily: {
+                        tech: ['"Share Tech Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e7eb; }
+
+        /* ── Scanline overlay ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.012) 2px, rgba(0,255,65,0.012) 4px);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── Glow helpers ── */
+        .glow-green  { box-shadow: 0 0 18px 2px rgba(0,255,65,0.35); }
+        .glow-green-sm { box-shadow: 0 0 8px 1px rgba(0,255,65,0.25); }
+        .text-glow   { text-shadow: 0 0 20px rgba(0,255,65,0.6); }
+        .border-glow { border-color: #00ff41 !important; box-shadow: 0 0 0 1px rgba(0,255,65,0.3); }
+
+        /* ── Glass card ── */
+        .glass {
+            background: rgba(17,17,17,0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        /* ── Toggle switch ── */
+        .toggle { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #2a2a2a; border-radius: 34px; transition: .3s; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #555; border-radius: 50%; transition: .3s; }
+        input:checked + .slider { background: #00ff41; }
+        input:checked + .slider:before { transform: translateX(16px); background: #000; }
+
+        /* ── Module chip card ── */
+        .mod-chip {
+            display: flex; align-items: center; gap: 10px;
+            background: #161616; border: 1px solid #222;
+            border-radius: 12px; padding: 10px 14px;
+            cursor: pointer; transition: all .25s; user-select: none;
+        }
+        .mod-chip:hover { border-color: #00ff41; background: #0d1a0d; }
+        .mod-chip.active { border-color: rgba(0,255,65,0.5); background: rgba(0,255,65,0.06); }
+        .mod-chip .icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .mod-chip.active .icon { background: rgba(0,255,65,0.15); color: #00ff41; }
+        .mod-chip:not(.active) .icon { background: #1f1f1f; color: #555; }
+        .mod-chip .label { font-size: 12px; font-weight: 600; flex: 1; }
+        .mod-chip.active .label { color: #e5e7eb; }
+        .mod-chip:not(.active) .label { color: #555; }
+
+        /* ── Severity badge ── */
+        .sev-critical { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+        .sev-high     { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
+        .sev-medium   { background: rgba(234,179,8,0.15);  color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+        .sev-low      { background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
+        .sev-info     { background: rgba(156,163,175,0.1); color: #9ca3af; border: 1px solid rgba(156,163,175,0.2); }
+
+        /* ── Finding card ── */
+        .finding-card { background: #111; border: 1px solid #1f1f1f; border-radius: 14px; overflow: hidden; transition: border-color .2s; }
+        .finding-card:hover { border-color: #2a2a2a; }
+        .finding-card .card-bar { width: 4px; flex-shrink: 0; }
+        .finding-card.critical .card-bar { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+        .finding-card.high     .card-bar { background: #f97316; box-shadow: 0 0 8px rgba(249,115,22,0.4); }
+        .finding-card.medium   .card-bar { background: #eab308; box-shadow: 0 0 8px rgba(234,179,8,0.4); }
+        .finding-card.low      .card-bar { background: #38bdf8; }
+        .finding-card.info     .card-bar { background: #6b7280; }
+        .finding-card .evidence-block { display: none; }
+        .finding-card.open .evidence-block { display: block; }
+        .finding-card .arrow { transition: transform .2s; }
+        .finding-card.open .arrow { transform: rotate(90deg); }
+
+        /* ── Filter tab ── */
+        .filter-tab { padding: 7px 18px; border-radius: 99px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+        .filter-tab.active { background: rgba(0,255,65,0.12); color: #00ff41; border: 1px solid rgba(0,255,65,0.35); }
+        .filter-tab:not(.active) { background: transparent; color: #6b7280; border: 1px solid #1f1f1f; }
+        .filter-tab:not(.active):hover { color: #9ca3af; border-color: #333; }
+
+        /* ── Terminal line ── */
+        .t-done { color: #00ff41; }
+        .t-run  { color: #facc15; }
+        .t-wait { color: #4b5563; }
+
+        /* ── Page tab ── */
+        .page-tab { padding: 10px 28px; font-weight: 700; font-size: 14px; cursor: pointer; letter-spacing: .05em; border-bottom: 2px solid transparent; transition: all .2s; }
+        .page-tab.active { border-bottom-color: #00ff41; color: #00ff41; }
+        .page-tab:not(.active) { color: #6b7280; }
+
+        /* ── Progress bar ── */
+        @keyframes shimmer { 0%{left:-100%} 100%{left:100%} }
+        .bar-shimmer::after { content:''; position:absolute; inset-y:0; left:-100%; width:50%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); animation: shimmer 1.6s infinite; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+
+        /* ── Radar axis labels fix ── */
+        .chartjs-render-monitor { animation: none !important; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  TOP NAVIGATION                                                     -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<nav class="sticky top-0 z-50 border-b border-white/5 bg-black/70 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-15 py-3">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-cyber/10 flex items-center justify-center border border-cyber/20">
+                <i class="fas fa-shield-virus text-cyber text-sm"></i>
+            </div>
+            <span class="font-tech text-white font-bold text-lg tracking-wide">VulnScan <span class="text-cyber">Pro</span></span>
+            <span class="ml-2 text-xs bg-cyber/10 text-cyber border border-cyber/20 rounded-full px-2 py-0.5 font-tech">UI PREVIEW</span>
+        </div>
+        <!-- Page switcher tabs -->
+        <div class="flex border-b border-transparent">
+            <div class="page-tab active" onclick="showPage('scan')">① Scan Page</div>
+            <div class="page-tab" onclick="showPage('results')">② Results Page</div>
+        </div>
+        <div class="text-xs text-gray-600 font-tech">Design Mock · Not Functional</div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  PAGE 1 — ENHANCED SCAN PAGE                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="scanPage" class="relative z-10">
+    <div class="max-w-4xl mx-auto px-4 py-14">
+
+        <!-- Hero -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center gap-2 bg-cyber/5 border border-cyber/15 rounded-full px-4 py-1 mb-5 text-xs text-cyber font-tech tracking-widest">
+                <span class="w-1.5 h-1.5 rounded-full bg-cyber animate-pulse inline-block"></span>
+                SECURITY INTELLIGENCE PLATFORM
+            </div>
+            <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyber via-green-300 to-blue-400 tracking-tight text-glow mb-4">
+                VulnScan Pro
+            </h1>
+            <p class="text-gray-400 text-lg">Expose vulnerabilities before attackers do.</p>
+        </div>
+
+        <!-- URL Input -->
+        <div class="relative mb-6 group">
+            <div class="absolute inset-0 rounded-xl bg-cyber/10 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+            <div class="relative flex items-center">
+                <i class="fas fa-crosshairs absolute left-4 text-cyber z-10 text-sm"></i>
+                <input type="text" value="https://example.com" placeholder="https://target.com"
+                    class="w-full pl-11 pr-36 py-4 bg-black/60 border border-gray-700 group-focus-within:border-cyber rounded-xl text-lg text-white focus:outline-none transition-all placeholder-gray-600 font-mono border-glow">
+                <div class="absolute right-3 flex items-center gap-2">
+                    <span class="text-xs text-gray-600 font-tech px-2 py-1 bg-gray-900 rounded-lg border border-gray-700">HTTP</span>
+                    <button onclick="showScanProgress()" class="bg-cyber text-black font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-400 transition-all glow-green-sm flex items-center gap-2">
+                        <i class="fas fa-bolt text-xs"></i> SCAN
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Cards Grid -->
+        <div class="glass rounded-2xl p-6 mb-4">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-cubes text-cyber"></i> Scan Modules
+                </h3>
+                <div class="flex gap-3 text-xs">
+                    <button class="text-cyber hover:text-green-300 transition" onclick="toggleAll(true)">Select All</button>
+                    <span class="text-gray-700">|</span>
+                    <button class="text-gray-500 hover:text-gray-300 transition" onclick="toggleAll(false)">Clear All</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="moduleGrid">
+                <!-- Modules injected by JS -->
+            </div>
+
+            <!-- Time estimate -->
+            <div class="mt-5 flex items-center justify-between bg-black/40 border border-white/5 rounded-xl px-4 py-3">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-stopwatch text-cyber text-sm"></i>
+                    <span class="text-sm text-gray-400">Estimated scan time: <span id="timeEst" class="text-white font-bold font-tech">~2 min 30 sec</span></span>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-600">
+                    <span id="activeCount" class="text-cyber font-bold">12</span> modules active
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications (collapsed look) -->
+        <div class="glass rounded-2xl px-6 py-4 mb-4">
+            <div class="flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-bell"></i> Notifications <span class="text-gray-700">(optional)</span>
+                </h3>
+                <i class="fas fa-chevron-down text-gray-600 text-xs transition-transform"></i>
+            </div>
+            <div class="hidden mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="relative">
+                    <i class="fab fa-slack absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                    <input type="url" placeholder="Slack Webhook URL" class="w-full pl-9 pr-4 py-3 bg-black/50 border border-gray-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyber transition placeholder-gray-600">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                    <input type="email" placeholder="Email for report" class="w-full pl-9 pr-4 py-3 bg-black/50 border border-gray-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyber transition placeholder-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Authorization + CTA -->
+        <div class="glass rounded-2xl p-6">
+            <label class="flex items-start gap-3 cursor-pointer mb-6">
+                <input type="checkbox" checked class="mt-1 w-4 h-4 rounded bg-gray-900 border-gray-700 text-cyber focus:ring-cyber accent-cyber">
+                <div class="text-sm">
+                    <span class="text-gray-300 font-medium">Authorization Agreement</span>
+                    <p class="text-gray-600 mt-0.5">I confirm I have explicit permission to scan this target.</p>
+                </div>
+            </label>
+            <button onclick="showScanProgress()" class="w-full py-4 bg-cyber text-black font-black text-lg rounded-xl hover:bg-green-300 transition-all glow-green flex items-center justify-center gap-3 group">
+                <div class="w-8 h-8 rounded-lg bg-black/20 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                LAUNCH SCAN
+            </button>
+        </div>
+
+        <!-- ── LIVE SCAN PROGRESS (hidden initially) ── -->
+        <div id="scanProgress" class="hidden mt-6">
+            <div class="glass rounded-2xl overflow-hidden">
+                <div class="p-5 border-b border-white/5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2.5 h-2.5 rounded-full bg-cyber animate-pulse"></div>
+                            <span class="text-sm font-semibold text-white">Scan in progress</span>
+                            <span class="text-xs font-tech text-gray-500" id="progressPct">34%</span>
+                        </div>
+                        <span class="text-xs text-gray-600 font-tech">https://example.com</span>
+                    </div>
+                    <!-- Progress bar -->
+                    <div class="w-full bg-gray-900 rounded-full h-1.5 overflow-hidden relative">
+                        <div id="progBar" class="bg-cyber h-1.5 rounded-full transition-all duration-700 relative overflow-hidden bar-shimmer" style="width:34%"></div>
+                    </div>
+                    <!-- Module status pills -->
+                    <div class="mt-4 flex flex-wrap gap-2" id="modStatusPills"></div>
+                </div>
+                <!-- Terminal -->
+                <div class="bg-black/60 p-4 font-mono text-xs h-44 overflow-y-auto" id="scanTerminal">
+                    <div class="t-done mb-1">[✓] WAF Detection — No WAF detected (0.8s)</div>
+                    <div class="t-done mb-1">[✓] Port Scan — 4 open ports: 80, 443, 8080, 3306</div>
+                    <div class="t-done mb-1">[✓] Security Headers — 8 missing headers found</div>
+                    <div class="t-done mb-1">[✓] SSL/TLS — Certificate valid · TLS 1.2 &amp; 1.3 supported</div>
+                    <div class="t-run  mb-1 animate-pulse">[~] SQL Injection — Testing 26 payloads on 4 forms...</div>
+                    <div class="t-wait mb-1">[…] XSS — Waiting</div>
+                    <div class="t-wait mb-1">[…] CSRF Detection — Waiting</div>
+                    <div class="t-wait mb-1">[…] Open Redirect — Waiting</div>
+                    <div class="t-wait mb-1">[…] DNS Recon — Waiting</div>
+                    <div class="t-wait mb-1">[…] Tech Fingerprinting — Waiting</div>
+                    <div class="t-wait mb-1">[…] Crawler — Waiting</div>
+                    <div class="t-wait">[…] JavaScript Analysis — Waiting</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  PAGE 2 — ENHANCED RESULTS PAGE                                     -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="resultsPage" class="hidden relative z-10">
+
+    <!-- Results nav -->
+    <div class="border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-14 z-40">
+        <div class="max-w-7xl mx-auto px-6 flex items-center justify-between py-3">
+            <div class="text-sm text-gray-500 font-tech">Scan completed · <span class="text-cyber">example.com</span></div>
+            <div class="flex gap-3">
+                <button class="text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 rounded-lg px-4 py-2 text-sm font-medium transition">
+                    <i class="fas fa-redo mr-2 text-xs"></i>New Scan
+                </button>
+                <button class="bg-cyber text-black font-bold rounded-lg px-4 py-2 text-sm hover:bg-green-300 transition glow-green-sm">
+                    <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                </button>
+                <button class="border border-gray-700 text-gray-400 hover:text-white rounded-lg px-4 py-2 text-sm transition">
+                    <i class="fas fa-code mr-2 text-xs"></i>Export JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+
+        <!-- ── 3-column header cards ── -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+            <!-- Target -->
+            <div class="glass rounded-2xl p-6 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 text-gray-800/10 text-8xl pointer-events-none"><i class="fas fa-globe"></i></div>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Target Details</p>
+                <p class="text-lg text-white font-mono font-bold break-all mb-4">https://example.com</p>
+                <div class="space-y-1 text-sm text-gray-500">
+                    <p>Scanned: <span class="text-gray-300">23 Apr 2026 · 19:30 IST</span></p>
+                    <p>Duration: <span class="text-gray-300">2 min 14 sec</span></p>
+                    <p>Status: <span class="text-cyber font-semibold">● COMPLETED</span></p>
+                </div>
+            </div>
+
+            <!-- Score gauge -->
+            <div class="glass rounded-2xl p-6 flex items-center gap-6 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-cyber/5 to-transparent pointer-events-none"></div>
+                <div class="w-28 h-28 flex-shrink-0">
+                    <canvas id="scoreDonut"></canvas>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Security Score</p>
+                    <div class="flex items-baseline gap-1 mb-1">
+                        <span class="text-5xl font-black text-white font-tech">62</span>
+                        <span class="text-gray-500 font-tech">/100</span>
+                    </div>
+                    <span class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">Grade: D</span>
+                    <p class="text-xs text-gray-600 mt-2">1 critical issue requires immediate attention.</p>
+                </div>
+            </div>
+
+            <!-- Findings summary -->
+            <div class="glass rounded-2xl p-6">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 pb-2 border-b border-white/5">Findings Summary</p>
+                <div class="space-y-3" id="severityBars"></div>
+            </div>
+        </div>
+
+        <!-- ── OWASP Radar ── -->
+        <div class="glass rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-spider text-cyber text-xs"></i> OWASP Top 10 — 2021 Risk Coverage
+                </h3>
+                <span class="text-xs text-gray-600">Higher = more findings in that category</span>
+            </div>
+            <div class="h-72 flex items-center justify-center">
+                <canvas id="owaspRadar" style="max-height:280px;max-width:600px;"></canvas>
+            </div>
+        </div>
+
+        <!-- ── Finding cards with filter tabs ── -->
+        <div class="glass rounded-2xl p-6">
+            <!-- Filter tabs -->
+            <div class="flex flex-wrap gap-2 mb-5">
+                <button class="filter-tab active" data-sev="all" onclick="filterFindings(this)">All <span class="ml-1 opacity-60">14</span></button>
+                <button class="filter-tab" data-sev="critical" onclick="filterFindings(this)">🔴 Critical <span class="ml-1 opacity-60">1</span></button>
+                <button class="filter-tab" data-sev="high"     onclick="filterFindings(this)">🟠 High <span class="ml-1 opacity-60">3</span></button>
+                <button class="filter-tab" data-sev="medium"   onclick="filterFindings(this)">🟡 Medium <span class="ml-1 opacity-60">5</span></button>
+                <button class="filter-tab" data-sev="low"      onclick="filterFindings(this)">🔵 Low <span class="ml-1 opacity-60">3</span></button>
+                <button class="filter-tab" data-sev="info"     onclick="filterFindings(this)">⚫ Info <span class="ml-1 opacity-60">2</span></button>
+            </div>
+
+            <!-- Finding cards -->
+            <div class="space-y-3" id="findingsContainer"></div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  JAVASCRIPT                                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<script>
+// ─── Module definitions ───────────────────────────────────────────────
+const MODULES = [
+    { id:'waf',   label:'WAF Detection',      icon:'fas fa-fire-flame-curved', time:15 },
+    { id:'port',  label:'Port Scan',           icon:'fas fa-network-wired',     time:20 },
+    { id:'hdr',   label:'Security Headers',    icon:'fas fa-heading',           time:5  },
+    { id:'ssl',   label:'SSL/TLS',             icon:'fas fa-lock',              time:10 },
+    { id:'dns',   label:'DNS Recon',           icon:'fas fa-server',            time:12 },
+    { id:'crawl', label:'Crawler',             icon:'fas fa-spider',            time:25 },
+    { id:'xss',   label:'XSS',                 icon:'fas fa-code',              time:30 },
+    { id:'sqli',  label:'SQL Injection',       icon:'fas fa-database',          time:35 },
+    { id:'csrf',  label:'CSRF Detection',      icon:'fas fa-shield-halved',     time:8  },
+    { id:'redir', label:'Open Redirect',       icon:'fas fa-right-from-bracket',time:8  },
+    { id:'tech',  label:'Tech Fingerprint',    icon:'fas fa-fingerprint',       time:10 },
+    { id:'js',    label:'JS Analysis',         icon:'fab fa-js',                time:20 },
+];
+let activeModules = new Set(MODULES.map(m => m.id));
+
+function buildModuleGrid() {
+    const grid = document.getElementById('moduleGrid');
+    grid.innerHTML = '';
+    MODULES.forEach(m => {
+        const isActive = activeModules.has(m.id);
+        const chip = document.createElement('div');
+        chip.className = `mod-chip ${isActive ? 'active' : ''}`;
+        chip.dataset.id = m.id;
+        chip.innerHTML = `
+            <div class="icon"><i class="${m.icon}"></i></div>
+            <span class="label">${m.label}</span>
+            <label class="toggle ml-auto" onclick="event.stopPropagation()">
+                <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleModule('${m.id}', this.checked)">
+                <span class="slider"></span>
+            </label>`;
+        chip.addEventListener('click', () => {
+            const cb = chip.querySelector('input');
+            cb.checked = !cb.checked;
+            toggleModule(m.id, cb.checked);
+        });
+        grid.appendChild(chip);
+    });
+    updateTimeEstimate();
+}
+
+function toggleModule(id, on) {
+    on ? activeModules.add(id) : activeModules.delete(id);
+    const chip = document.querySelector(`.mod-chip[data-id="${id}"]`);
+    chip.classList.toggle('active', on);
+    updateTimeEstimate();
+}
+function toggleAll(on) {
+    MODULES.forEach(m => { on ? activeModules.add(m.id) : activeModules.delete(m.id); });
+    buildModuleGrid();
+}
+function updateTimeEstimate() {
+    let secs = 0;
+    MODULES.forEach(m => { if (activeModules.has(m.id)) secs += m.time; });
+    const m = Math.floor(secs/60), s = secs%60;
+    document.getElementById('timeEst').textContent = `~${m} min ${s} sec`;
+    document.getElementById('activeCount').textContent = activeModules.size;
+}
+
+// ─── Scan progress animation ──────────────────────────────────────────
+const MODULE_SCAN_ORDER = ['waf','port','hdr','ssl','dns','crawl','xss','sqli','csrf','redir','tech','js'];
+const MODULE_LABELS = { waf:'WAF', port:'Port', hdr:'Headers', ssl:'SSL/TLS', dns:'DNS', crawl:'Crawler', xss:'XSS', sqli:'SQLi', csrf:'CSRF', redir:'Redirect', tech:'Fingerprint', js:'JS' };
+
+function buildModStatusPills(doneIdx) {
+    const container = document.getElementById('modStatusPills');
+    container.innerHTML = '';
+    MODULE_SCAN_ORDER.forEach((id, i) => {
+        if (!activeModules.has(id)) return;
+        const el = document.createElement('span');
+        let cls, dot;
+        if (i < doneIdx)       { cls='bg-cyber/10 text-cyber border border-cyber/25';    dot='✓'; }
+        else if (i===doneIdx)  { cls='bg-yellow-400/10 text-yellow-300 border border-yellow-400/25 animate-pulse'; dot='~'; }
+        else                   { cls='bg-gray-900 text-gray-600 border border-white/5';  dot='…'; }
+        el.className = `${cls} rounded-full px-2.5 py-0.5 text-xs font-tech`;
+        el.textContent = `${dot} ${MODULE_LABELS[id]}`;
+        container.appendChild(el);
+    });
+}
+
+function showScanProgress() {
+    document.getElementById('scanProgress').classList.remove('hidden');
+    let pct = 34, step = 0;
+    buildModStatusPills(3);
+    const interval = setInterval(() => {
+        pct = Math.min(pct + Math.random()*4, 98);
+        step = Math.floor(pct / (100/MODULE_SCAN_ORDER.length));
+        document.getElementById('progBar').style.width = pct + '%';
+        document.getElementById('progressPct').textContent = Math.floor(pct) + '%';
+        buildModStatusPills(step);
+        if (pct >= 98) {
+            clearInterval(interval);
+            document.getElementById('progBar').style.width = '100%';
+            document.getElementById('progressPct').textContent = '100%';
+            buildModStatusPills(999);
+        }
+    }, 600);
+    document.getElementById('scanProgress').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ─── Page switcher ────────────────────────────────────────────────────
+function showPage(p) {
+    document.getElementById('scanPage').classList.toggle('hidden', p!=='scan');
+    document.getElementById('resultsPage').classList.toggle('hidden', p!=='results');
+    document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    if (p === 'results') buildResultsPage();
+}
+
+// ─── Results page: severity bars ──────────────────────────────────────
+const SEVS = [
+    { key:'critical', label:'Critical', count:1, color:'#ef4444', bgcls:'bg-red-500' },
+    { key:'high',     label:'High',     count:3, color:'#f97316', bgcls:'bg-orange-500' },
+    { key:'medium',   label:'Medium',   count:5, color:'#eab308', bgcls:'bg-yellow-400' },
+    { key:'low',      label:'Low',      count:3, color:'#38bdf8', bgcls:'bg-sky-400' },
+    { key:'info',     label:'Info',     count:2, color:'#6b7280', bgcls:'bg-gray-500' },
+];
+const total = SEVS.reduce((a,s)=>a+s.count,0);
+
+function buildSeverityBars() {
+    const c = document.getElementById('severityBars');
+    if (!c) return;
+    c.innerHTML = '';
+    SEVS.forEach(s => {
+        const pct = Math.round(s.count/total*100);
+        c.innerHTML += `
+        <div class="flex items-center gap-3">
+            <span class="w-16 text-xs font-semibold" style="color:${s.color}">${s.label}</span>
+            <div class="flex-1 h-2 bg-gray-900 rounded-full overflow-hidden">
+                <div class="${s.bgcls} h-2 rounded-full transition-all duration-700" style="width:${pct}%"></div>
+            </div>
+            <span class="text-xs font-bold text-gray-300 w-4 text-right">${s.count}</span>
+        </div>`;
+    });
+}
+
+// ─── Results page: score donut ────────────────────────────────────────
+let scoreDonutChart = null;
+function buildScoreDonut() {
+    const ctx = document.getElementById('scoreDonut');
+    if (!ctx) return;
+    if (scoreDonutChart) { scoreDonutChart.destroy(); }
+    scoreDonutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{ data: [62, 38], backgroundColor: ['#eab308','#1a1a1a'], borderWidth: 0, hoverOffset: 0 }]
+        },
+        options: {
+            cutout: '78%', rotation: -90, circumference: 360,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            animation: { duration: 1200 }
+        }
+    });
+}
+
+// ─── Results page: OWASP radar ────────────────────────────────────────
+let owaspChart = null;
+function buildOwaspRadar() {
+    const ctx = document.getElementById('owaspRadar');
+    if (!ctx) return;
+    if (owaspChart) { owaspChart.destroy(); }
+    owaspChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['A01 Broken Access','A02 Crypto Failures','A03 Injection','A04 Insecure Design','A05 Misconfig','A06 Vuln Components','A07 Auth Failures','A08 Integrity','A09 Logging','A10 SSRF'],
+            datasets: [{
+                label: 'Risk Level',
+                data: [2, 4, 5, 1, 7, 3, 2, 1, 0, 0],
+                backgroundColor: 'rgba(0,255,65,0.1)',
+                borderColor: '#00ff41',
+                pointBackgroundColor: '#00ff41',
+                pointBorderColor: '#000',
+                pointRadius: 4,
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            scales: {
+                r: {
+                    min: 0, max: 8,
+                    ticks: { display: false, stepSize: 2 },
+                    grid: { color: 'rgba(255,255,255,0.06)' },
+                    angleLines: { color: 'rgba(255,255,255,0.06)' },
+                    pointLabels: { color: '#6b7280', font: { size: 10, family: 'Inter' } }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => `Risk score: ${ctx.raw}` } }
+            },
+            animation: { duration: 1200 }
+        }
+    });
+}
+
+// ─── Results page: finding cards ─────────────────────────────────────
+const FINDINGS = [
+    { sev:'critical', title:'SQL Injection', module:'SQL Injection', endpoint:'POST /login · username param',
+      desc:'Error-based SQLi detected. The application returned a raw MySQL error string.',
+      evidence:`Payload: ' OR '1'='1\nEvidence: "You have an error in your SQL syntax..."`,
+      owasp:'A03:2021 · CWE-89', rec:'Use parameterised queries / prepared statements.' },
+    { sev:'high', title:'Cross-Site Scripting (XSS)', module:'XSS Scanner', endpoint:'POST /search · query param',
+      desc:'Reflected XSS — payload reflected unescaped in the response body.',
+      evidence:`Payload: <script>alert(1)</script>\nReflected in: <p>Results for: <script>alert(1)</script>`,
+      owasp:'A03:2021 · CWE-79', rec:'HTML-encode all user-supplied output.' },
+    { sev:'high', title:'Missing CSRF Token', module:'CSRF Detection', endpoint:'POST /transfer · amount, account',
+      desc:'State-changing POST form has no CSRF token. Session cookie also lacks SameSite attribute.',
+      evidence:'No hidden input matching CSRF pattern found.\nCookie "session_id" missing SameSite + Secure.',
+      owasp:'A01:2021 · CWE-352', rec:'Add a cryptographically random CSRF token to every POST form.' },
+    { sev:'high', title:'Open Redirect', module:'Open Redirect', endpoint:'GET /login · next param',
+      desc:'The `next` redirect parameter is not validated — attacker can redirect users to evil.com.',
+      evidence:'Payload: //evil.com\nLocation header: //evil.com (HTTP 302)',
+      owasp:'A01:2021 · CWE-601', rec:'Validate redirect targets against a server-side allowlist.' },
+    { sev:'medium', title:'No WAF Detected', module:'WAF Detector', endpoint:'All endpoints',
+      desc:'No Web Application Firewall signatures were detected. Attack payloads are not being filtered.',
+      evidence:'0/3 probe requests were blocked. No WAF headers found.',
+      owasp:'A05:2021', rec:'Deploy ModSecurity, Cloudflare WAF, or AWS WAF.' },
+    { sev:'medium', title:'Missing Content-Security-Policy', module:'Security Headers', endpoint:'All pages',
+      desc:'The CSP header is absent, enabling XSS and data injection attacks.',
+      evidence:'Header "Content-Security-Policy" not present in any response.',
+      owasp:'A05:2021 · CWE-693', rec:"Add: Content-Security-Policy: default-src 'self'" },
+    { sev:'medium', title:'Missing Strict-Transport-Security', module:'Security Headers', endpoint:'All pages',
+      desc:'HSTS is absent. Browsers may downgrade HTTPS to HTTP on first load.',
+      evidence:'Header "Strict-Transport-Security" not present.',
+      owasp:'A02:2021 · CWE-311', rec:'Add: Strict-Transport-Security: max-age=31536000; includeSubDomains' },
+    { sev:'low', title:'jQuery 1.12.4 (Outdated)', module:'Tech Fingerprinting', endpoint:'<script src="/jquery-1.12.4.min.js">',
+      desc:'jQuery 1.12.4 has known XSS vulnerabilities (CVE-2015-9251).',
+      evidence:'Detected via script src: jquery-1.12.4.min.js',
+      owasp:'A06:2021 · CVE-2015-9251', rec:'Upgrade to jQuery 3.7+.' },
+    { sev:'info', title:'AWS Access Key in JS', module:'JS Analysis', endpoint:'/secrets.js',
+      desc:'An AWS access key pattern (AKIA...) was detected in a public JS file.',
+      evidence:'AKIA***REDACTED***MPLE (16-char suffix)',
+      owasp:'A02:2021 · CWE-312', rec:'Rotate the key immediately. Never embed credentials in frontend code.' },
+];
+
+function buildFindingCards(filter='all') {
+    const c = document.getElementById('findingsContainer');
+    c.innerHTML = '';
+    const filtered = filter==='all' ? FINDINGS : FINDINGS.filter(f=>f.sev===filter);
+    filtered.forEach((f, i) => {
+        const card = document.createElement('div');
+        card.className = `finding-card ${f.sev}`;
+        card.dataset.sev = f.sev;
+        const SEV_LABELS = { critical:'CRITICAL',high:'HIGH',medium:'MEDIUM',low:'LOW',info:'INFO' };
+        card.innerHTML = `
+        <div class="flex">
+            <div class="card-bar"></div>
+            <div class="flex-1 p-4">
+                <div class="flex items-start justify-between gap-4 cursor-pointer" onclick="toggleCard(this)">
+                    <div class="flex items-start gap-3 flex-1 min-w-0">
+                        <span class="sev-${f.sev} text-xs font-bold font-tech px-2 py-0.5 rounded-md whitespace-nowrap mt-0.5">${SEV_LABELS[f.sev]}</span>
+                        <div class="min-w-0">
+                            <p class="font-bold text-white text-sm">${f.title}</p>
+                            <p class="text-xs text-gray-500 font-mono truncate mt-0.5">${f.endpoint}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 flex-shrink-0">
+                        <span class="text-xs text-gray-600">${f.module}</span>
+                        <i class="fas fa-chevron-right arrow text-gray-600 text-xs"></i>
+                    </div>
+                </div>
+                <div class="evidence-block mt-4 pt-4 border-t border-white/5">
+                    <p class="text-sm text-gray-300 mb-3">${f.desc}</p>
+                    <div class="bg-black/60 border border-white/5 rounded-xl p-3 font-mono text-xs text-gray-400 mb-3 whitespace-pre-wrap">${f.evidence}</div>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <span class="text-xs text-gray-600">📌 ${f.owasp}</span>
+                        <div class="flex gap-2">
+                            <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg px-3 py-1.5">💡 ${f.rec}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        c.appendChild(card);
+    });
+}
+
+function toggleCard(header) {
+    header.closest('.finding-card').classList.toggle('open');
+}
+
+function filterFindings(btn) {
+    document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    buildFindingCards(btn.dataset.sev);
+}
+
+// ─── Build results page (once) ────────────────────────────────────────
+let resultsBuilt = false;
+function buildResultsPage() {
+    if (resultsBuilt) return;
+    resultsBuilt = true;
+    buildSeverityBars();
+    setTimeout(() => { buildScoreDonut(); buildOwaspRadar(); }, 100);
+    buildFindingCards();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────
+buildModuleGrid();
+</script>
+
+</body>
+</html>

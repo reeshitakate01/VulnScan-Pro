@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}CSRF{% endblock %}
+{% block content %}
+
+<h2>Cross-Site Request Forgery (CSRF)</h2>
+<p>No anti-CSRF tokens present. A POST request to this endpoint will execute without validating the origin.</p>
+
+<form method="POST" action="/csrf">
+    <label>Action to perform (e.g., Delete User):</label>
+    <div style="margin-top:5px;">
+        <input type="text" name="action" value="Delete User">
+        <button type="submit">Execute action</button>
+    </div>
+</form>
+
+{% endblock %}

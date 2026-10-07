@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}XSS (Reflected){% endblock %}
+{% block content %}
+
+<h2>Reflected XSS Test Environment</h2>
+<p>Search for a user or id. The query is returned to you directly without template escaping or HTML entity conversion.</p>
+
+<form method="GET" action="/vulnerable-form">
+    <label>Search Query:</label>
+    <input type="text" name="query" placeholder="Inject XSS payload here">
+    <button type="submit">Search</button>
+</form>
+
+{% if query %}
+    <!-- VULNERABILITY SINK: RAW OUTPUT without Jinja 'e' filter -->
+    <div style="margin-top:20px; padding:15px; background: #f4f4f4; border:1px solid #ddd;">
+        <p>Results for: {{ query | safe }}</p>
+    </div>
+{% endif %}
+
+{% endblock %}

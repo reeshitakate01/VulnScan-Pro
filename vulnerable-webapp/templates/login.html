@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}SQL Login{% endblock %}
+{% block content %}
+
+<h2>SQL Injection Test</h2>
+<p>Log in with valid credentials, or exploit the lack of parameterization using <code>' OR 1=1 --</code></p>
+
+<!-- Typical SQLi target -->
+<form method="POST" action="/login">
+    <div>
+        <label>Username (try: admin):</label><br>
+        <input type="text" name="username">
+    </div>
+    <div style="margin-top: 10px;">
+        <label>Password (try: admin123):</label><br>
+        <input type="password" name="password">
+    </div>
+    <button type="submit" style="margin-top: 15px;">Login (Insecure)</button>
+</form>
+
+{% if error %}
+    <p style="color:red;">{{ error }}</p>
+{% endif %}
+
+{% endblock %}

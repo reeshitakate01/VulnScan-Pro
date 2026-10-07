@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Unrestricted Upload{% endblock %}
+{% block content %}
+
+<h2>Unrestricted File Upload</h2>
+<p>Upload any file. No extension or MIME-type validation is performed on the server side.</p>
+
+<form method="POST" action="/upload" enctype="multipart/form-data">
+    <div style="margin-bottom: 10px;">
+        <input type="file" name="file">
+    </div>
+    <button type="submit">Upload File</button>
+</form>
+
+{% endblock %}

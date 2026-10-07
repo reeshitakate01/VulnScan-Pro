@@ -1,0 +1,136 @@
+==========================================================
+    VulnScan Pro -- Backtest Accuracy Runner
+==========================================================
+
+[*] Starting vulnerable test server on port 9999...
+[OK] Test server is running.
+
+============================================================
+  Testing: Header Scanner
+============================================================
+  [PASS]  Missing header detected: Content-Security-Policy
+  [PASS]  Missing header detected: Strict-Transport-Security
+  [PASS]  Missing header detected: X-Frame-Options
+  [PASS]  Missing header detected: X-Content-Type-Options
+  [PASS]  Missing header detected: X-XSS-Protection
+  [PASS]  Missing header detected: Referrer-Policy
+  [PASS]  Missing header detected: Permissions-Policy
+  [PASS]  Missing header detected: Cache-Control
+  [PASS]  Insecure cookie flagged: Missing: Secure, HttpOnly
+  [INFO]  Total findings: 10
+
+============================================================
+  Testing: XSS Scanner
+============================================================
+  [PASS]  XSS detected in vulnerable form (True Positive)
+  [PASS]  No XSS in safe form (True Negative)
+
+============================================================
+  Testing: SQL Injection Scanner
+============================================================
+  [PASS]  SQLi detected (payload: ' OR '1'='1)
+  [INFO]  Evidence: MySQL error pattern: 'you have an error in your sql syntax'
+  [PASS]  No SQLi in safe form (True Negative)
+
+============================================================
+  Testing: Crawler
+============================================================
+  [PASS]  Crawled 3 pages (expected >=3)
+  [PASS]  Found 4 forms (expected >=3)
+  [PASS]  Found 1 hidden field(s)
+  [PASS]  Found emails: ['admin@vulntest.local', 'support@vulntest.local']
+  [PASS]  Found 2 sensitive comment(s)
+  [PASS]  Found 2 external script(s)
+
+============================================================
+  Testing: Tech Fingerprinting
+============================================================
+  [PASS]  Detected nginx (version: 1.18.0)
+  [PASS]  CVEs found for nginx: ['CVE-2021-23017', 'CVE-2022-41741']
+  [PASS]  Detected PHP from X-Powered-By
+  [PASS]  Detected WordPress (version: 5.8.2)
+  [PASS]  Detected jQuery (version: 1.12.4)
+  [INFO]  All detected techs: ['nginx', 'php', 'wordpress', 'jquery']
+
+============================================================
+  Testing: JavaScript Analyzer
+============================================================
+  [PASS]  Detected: AWS key detection
+  [PASS]  Detected: GitHub token detection
+  [PASS]  Detected: Internal IP detection
+  [PASS]  Detected: Localhost ref detection
+  [PASS]  Detected: API endpoint detection
+  [PASS]  Detected: TODO comment detection
+  [PASS]  Detected generic secret / hardcoded credential
+  [INFO]  Total findings: 12, keys: ['aws_access_key', 'github_token', 'generic_secret', 'generic_secret', 'generic_secret', 'internal_ip', 'localhost_ref', 'api_endpoint', 'todo_fixme', 'commented_code_creds', 'commented_code_creds', 'commented_code_creds']
+
+============================================================
+  Testing: Port Scanner
+============================================================
+  [PASS]  Open ports found: [135, 445, 6379, 8000]
+  [INFO]  Ports tested: 4 results returned
+
+============================================================
+  Testing: DNS Recon (External: scanme.nmap.org)
+============================================================
+  [PASS]  A records found: ['45.33.32.156']
+  [PASS]  NS records found: ['ns1.linode.com.', 'ns5.linode.com.']...
+  [PASS]  No errors during DNS recon
+
+============================================================
+  Testing: SSL/TLS Scanner (External targets)
+============================================================
+  [INFO]  Testing https://expired.badssl.com ...
+  [PASS]  Expired cert detected as invalid
+  [INFO]  Testing https://self-signed.badssl.com ...
+  [PASS]  Self-signed cert detected
+  [INFO]  Testing https://www.google.com ...
+  [PASS]  Valid cert correctly identified
+  [PASS]  Correctly handles non-HTTPS URL
+
+============================================================
+  Testing: WAF Detector
+============================================================
+  [PASS]  Correctly identified no WAF on local test server (True Negative)
+  [PASS]  Result dict contains all required keys
+  [INFO]  WAF detected: False | Blocked probes: 0
+
+============================================================
+  Testing: Open Redirect Scanner
+============================================================
+  [PASS]  Open Redirect detected via `next` URL parameter (True Positive)
+  [PASS]  Open Redirect detected in form with `next` input (True Positive)
+  [PASS]  No false positive on safe form (True Negative)
+
+============================================================
+  Testing: CSRF Scanner
+============================================================
+  [PASS]  CSRF detected on POST form without token (True Positive)
+  [PASS]  No CSRF finding on form with valid token (True Negative)
+  [PASS]  GET forms correctly excluded from CSRF checks (True Negative)
+
+============================================================
+  BACKTEST RESULTS SUMMARY
+============================================================
+
+  Module                  Tests   Pass   Fail    TP    TN    FP    FN  Accuracy
+  ------------------------------------------------------------------------------
+  Header Scanner              9      9      0     9     0     0     0    100.0%
+  XSS Scanner                 2      2      0     1     1     0     0    100.0%
+  SQLi Scanner                2      2      0     1     1     0     0    100.0%
+  Crawler                     6      6      0     6     0     0     0    100.0%
+  Tech Fingerprint            5      5      0     5     0     0     0    100.0%
+  JS Analyzer                 7      7      0     7     0     0     0    100.0%
+  Port Scanner                1      1      0     1     0     0     0    100.0%
+  DNS Recon                   3      3      0     2     1     0     0    100.0%
+  SSL Scanner                 4      4      0     2     2     0     0    100.0%
+  WAF Detector                2      2      0     1     1     0     0    100.0%
+  Open Redirect               3      3      0     2     1     0     0    100.0%
+  CSRF Scanner                3      3      0     1     2     0     0    100.0%
+
+  TOTAL                      47     47      0
+
+  Overall Accuracy: 100.0%
+
+Results saved to: D:\Nessus 2.0\vulnscan-pro\backtest_results.txt
+Test server will shut down with this process.
