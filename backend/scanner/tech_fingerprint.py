@@ -93,7 +93,15 @@ def run_tech_fingerprint(url):
                 unique_techs[name] = t
                 
         results["technologies"] = list(unique_techs.values())
-        
+
+        # Augment the offline CVE table with live OSV.dev advisories (fails
+        # open: no network / disabled / unknown ecosystem => offline results).
+        try:
+            from scanner.cve_lookup import enrich_technologies
+            enrich_technologies(results["technologies"])
+        except Exception:
+            pass
+
         from scanner.favicon_analyzer import FaviconAnalyzer
         fav_analyzer = FaviconAnalyzer()
         results["favicon"] = fav_analyzer.analyze(url)
