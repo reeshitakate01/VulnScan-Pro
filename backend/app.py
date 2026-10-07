@@ -474,6 +474,37 @@ def download_report(scan_id):
         return send_file(filepath, as_attachment=True)
     return jsonify({'error': 'Report not found'}), 404
 
+
+def _scan_to_dict(scan):
+    return {
+        'url': scan.url,
+        'score': scan.score,
+        'grade': scan.grade,
+        'summary': scan.summary,
+        'results_json': json.loads(scan.results_json) if scan.results_json else {},
+    }
+
+
+@app.route('/api/report/<scan_id>/json')
+def download_report_json(scan_id):
+    """Structured JSON export for programmatic use."""
+    scan = ScanTask.query.get_or_404(scan_id)
+    from report.exporters import build_json_export
+    return jsonify(build_json_export(_scan_to_dict(scan)))
+
+
+@app.route('/api/report/<scan_id>/sarif')
+def download_report_sarif(scan_id):
+    """SARIF 2.1.0 export (ingestible by GitHub code scanning / CI)."""
+    scan = ScanTask.query.get_or_404(scan_id)
+    from report.exporters import build_sarif
+    payload = json.dumps(build_sarif(_scan_to_dict(scan)), indent=2)
+    return Response(
+        payload,
+        mimetype='application/sarif+json',
+        headers={'Content-Disposition': f'attachment; filename={scan_id}.sarif'},
+    )
+
 if __name__ == '__main__':
     os.makedirs(os.path.join(os.path.dirname(__file__), '..', 'reports'), exist_ok=True)
     app.run(
