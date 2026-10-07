@@ -1,8 +1,9 @@
 import requests
-import mmh3
 import base64
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+
+from scanner import _murmur as mmh3  # pure-Python mmh3.hash replacement
 
 class FaviconAnalyzer:
 

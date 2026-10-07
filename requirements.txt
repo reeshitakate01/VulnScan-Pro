@@ -1,13 +1,11 @@
-flask
-flask-cors
-requests
-beautifulsoup4
-dnspython
-reportlab
-sqlalchemy
-flask-sqlalchemy
-python-whois
-playwright
-concurrent-log-handler
-uuid
-jsbeautifier>=1.14.0
+# VulnScan Pro — runtime dependencies (pinned to compatible releases)
+Flask~=3.0
+Flask-Cors~=4.0
+Flask-SQLAlchemy~=3.1
+SQLAlchemy~=2.0
+requests~=2.31
+beautifulsoup4~=4.12
+dnspython~=2.6
+reportlab~=4.1
+jsbeautifier~=1.15
+python-dotenv~=1.0

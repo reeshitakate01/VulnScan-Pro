@@ -1,6 +1,32 @@
+# Python
 venv/
+.venv/
+env/
 __pycache__/
 *.pyc
+*.pyo
 instance/
-.DS_Store
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Environment / secrets
 .env
+*.pem
+*.key
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated scan reports
+reports/*.pdf
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

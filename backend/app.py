@@ -9,14 +9,22 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import logging
 
+from config import config
+from scanner.safe_requests import validate_target
+
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-app = Flask(__name__, 
-            template_folder=os.path.join(base_dir, 'frontend'), 
+app = Flask(__name__,
+            template_folder=os.path.join(base_dir, 'frontend'),
             static_folder=os.path.join(base_dir, 'frontend', 'static'))
+app.secret_key = config.SECRET_KEY
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scans.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Bounded worker pool: cap simultaneous scans so a burst of requests cannot
+# exhaust threads/sockets. Acquired by each scan thread, released when done.
+scan_semaphore = threading.BoundedSemaphore(config.MAX_CONCURRENT_SCANS)
 
 db = SQLAlchemy(app)
 
@@ -67,7 +75,8 @@ def bg_run_scan(scan_id, url, selected_modules, webhook_url=None, email=None):
     from scanner.time_estimator import TimeEstimator
     from report.pdf_generator import generate_pdf
     app_context = app.app_context()
-    
+
+    scan_semaphore.acquire()
     log_event(app_context, scan_id, f"Started scanning {url}")
     results = {}
     
@@ -321,6 +330,8 @@ def bg_run_scan(scan_id, url, selected_modules, webhook_url=None, email=None):
             task.summary = f"Scan failed due to an internal error: {str(e)}"
             db.session.commit()
         log_event(app_context, scan_id, f"Error: {str(e)}")
+    finally:
+        scan_semaphore.release()
 
 # --- API Endpoints ---
 @app.route('/')
@@ -348,7 +359,12 @@ def start_scan():
         
     if not url.startswith('http://') and not url.startswith('https://'):
         url = 'http://' + url
-        
+
+    # SSRF guard: refuse internal/reserved targets unless explicitly allowed.
+    ok, reason = validate_target(url)
+    if not ok:
+        return jsonify({'error': f'Target not allowed: {reason}'}), 400
+
     scan_id = str(uuid.uuid4())
     
     new_scan = ScanTask(id=scan_id, url=url, status='running')
@@ -372,7 +388,12 @@ def estimate_time():
 def stream_scan(scan_id):
     def generate():
         last_event_id = 0
+        start_ts = time.time()
         while True:
+            if time.time() - start_ts > config.SCAN_MAX_DURATION:
+                data = json.dumps({"status": "error", "message": "Scan timed out."})
+                yield f"data: {data}\n\n"
+                break
             with app.app_context():
                 # Poll DB for new events
                 events = ScanEvent.query.filter_by(scan_id=scan_id).filter(ScanEvent.id > last_event_id).order_by(ScanEvent.id).all()
@@ -420,4 +441,9 @@ def download_report(scan_id):
 
 if __name__ == '__main__':
     os.makedirs(os.path.join(os.path.dirname(__file__), '..', 'reports'), exist_ok=True)
-    app.run(debug=True, threaded=True)
+    app.run(
+        debug=config.DEBUG,
+        threaded=True,
+        host=os.getenv('HOST', '127.0.0.1'),
+        port=int(os.getenv('PORT', '5000')),
+    )
