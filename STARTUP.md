@@ -1,105 +1,57 @@
-# VulnScan Pro — Manual Startup Guide
+# VulnScan Pro — Startup Guide
 
-## Prerequisites
+For the full documentation see [README.md](README.md). This is the short version.
 
-- **Python 3.10+** installed and on your `PATH`
-- **pip** available
-- **Git** (optional, only if cloning)
+## Fastest: Docker
 
----
-
-## Step 1 — Navigate to the Project Root
-
-```powershell
-cd "e:\Projects\Nessus 2.0\vulnscan-pro"
+```bash
+docker compose up --build
+# open http://localhost:5000
 ```
 
----
-
-## Step 2 — Create & Activate a Virtual Environment
-
-> Skip this step if `venv\` already exists and was already activated before.
+## Manual (Windows PowerShell)
 
 ```powershell
-# Create the virtual environment (first time only)
+# 1. From the project root, create and activate a virtual environment
 python -m venv venv
-
-# Activate it (Windows PowerShell)
 .\venv\Scripts\Activate.ps1
-```
+# If PowerShell blocks the script, run once:
+#   Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 
-> **If you get a script-execution error on PowerShell**, run this once:
-> ```powershell
-> Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-> ```
-
----
-
-## Step 3 — Install Dependencies
-
-```powershell
+# 2. Install dependencies
 pip install -r requirements.txt
-```
 
----
+# 3. (optional) copy and edit configuration
+copy .env.example .env
 
-## Step 4 — Start the Application
-
-```powershell
+# 4. Start the app
 cd backend
 python app.py
 ```
 
-The server starts at **http://127.0.0.1:5000**
+The server starts at **http://127.0.0.1:5000**.
 
-Open your browser and go to:
-```
-http://127.0.0.1:5000
-```
+## Manual (macOS / Linux)
 
----
-
-## Step 5 (Optional) — Run the Backtest Suite
-
-In a **separate terminal**, with the venv active:
-
-```powershell
-cd "e:\Projects\Nessus 2.0\vulnscan-pro\backend"
-python -m tests.backtest_runner
+```bash
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env            # optional
+cd backend && python app.py
 ```
 
-Results are written to:
+## Run the tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest
 ```
-e:\Projects\Nessus 2.0\vulnscan-pro\backtest_results.txt
-```
-
----
-
-## Quick-Start (All-in-One)
-
-Copy and paste this entire block into PowerShell from the project root:
-
-```powershell
-cd "e:\Projects\Nessus 2.0\vulnscan-pro"
-.\venv\Scripts\Activate.ps1
-cd backend
-python app.py
-```
-
----
-
-## Stopping the App
-
-Press **`Ctrl + C`** in the terminal where `app.py` is running.
-
----
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| `ModuleNotFoundError` | Run `pip install -r requirements.txt` with the venv active |
-| `Address already in use` on port 5000 | Kill the process: `netstat -ano \| findstr :5000` then `taskkill /PID <pid> /F` |
-| PowerShell won't run `.ps1` scripts | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| `python` not found | Use `python3` instead, or add Python to your `PATH` |
-| Port scanner shows no results | Run the terminal **as Administrator** for raw socket access |
+| `ModuleNotFoundError` | Activate the venv, then `pip install -r requirements.txt`. |
+| Port 5000 in use | Set `PORT=5001` (env var) before starting. |
+| "Target not allowed" error | `SAFE_MODE` is blocking an internal host. Add it to `SAFE_MODE_ALLOW`, or set `SAFE_MODE=0` **only** for hosts you are authorised to test. |
+| Port scan shows nothing | Some environments need elevated privileges for raw sockets. |
