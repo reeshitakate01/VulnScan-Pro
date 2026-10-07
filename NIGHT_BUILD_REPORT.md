@@ -10,8 +10,8 @@
 
 Good morning! The project is in a much stronger, interview-ready state.
 
-- ✅ **7 batches shipped**, each committed and pushed to `main`.
-- ✅ **37 unit/API tests — all green.**
+- ✅ **8 batches shipped**, each committed and pushed to `main`.
+- ✅ **42 unit/API tests — all green.**
 - ✅ **GitHub Actions CI** (lint + tests) is set up and **passing**.
 - ✅ **End-to-end verified:** a live scan of `example.com` ran the full
   pipeline and produced a score (21/F), a PDF, and JSON + SARIF exports.
@@ -70,10 +70,14 @@ table, API reference, responsible-use disclaimer, roadmap, CI badge) and fixed
 `GET /api/scans` + a `/history` page listing past scans (date, target, score,
 grade) with links to each result. History links added to home & results pages.
 
+### Batch H — Test coverage & community docs — `64c9fcc`
+Mocked tests for the http_methods/recon modules and the OWASP mapper (now
+**42 tests**), plus `SECURITY.md`, `CONTRIBUTING.md` and `CHANGELOG.md`.
+
 ---
 
 ## 🔬 Verification done
-- `pytest` → **37 passed**.
+- `pytest` → **42 passed**.
 - `ruff check .` → clean.
 - GitHub Actions CI → passing on `main`.
 - Live end-to-end scan of `https://example.com` (benign modules only):
@@ -141,9 +145,9 @@ git clone https://github.com/reeshitakate01/VulnScan-Pro.git C:\Users\Reeshita\V
 ---
 
 ## 📊 By the numbers
-- 8 commits (1 initial + 7 feature batches).
+- 9 commits (1 initial + 8 feature batches).
 - +4 new scanner modules (CORS, HTTP methods, recon) and a CVE-lookup module.
 - +2 new export formats (JSON, SARIF).
-- 37 automated tests, CI pipeline, Docker, and a full README.
+- 42 automated tests, CI pipeline, Docker, and a full README.
 
 _This file was written by the overnight build and reflects the final state._
