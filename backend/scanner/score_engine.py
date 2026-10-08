@@ -81,7 +81,9 @@ def calculate_score(scan_results):
         if dns_res.get("zone_transfer_vulnerable"):
             score -= deductions["CRITICAL"]
             findings_count["CRITICAL"] += 1
-        if not dns_res.get("spf"):
+        # SPF presence is reported by the DNS module under `spf_analysis.exists`
+        # (not a bare `spf` key). The old check deducted on every scan.
+        if not (dns_res.get("spf_analysis") or {}).get("exists"):
             score -= deductions["MEDIUM"]
             findings_count["MEDIUM"] += 1
         if not dns_res.get("dmarc"):

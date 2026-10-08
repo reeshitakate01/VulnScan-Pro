@@ -302,8 +302,10 @@ def bg_run_scan(scan_id, url, selected_modules, webhook_url=None, email=None):
                             "Recommendation": ""
                         })
                 elif mod == "dns":
-                    if not mod_res.get("spf"):
+                    if not (mod_res.get("spf_analysis") or {}).get("exists"):
                         mod_findings.append({"Finding": "Missing SPF", "Severity": "MEDIUM", "Description": "No SPF record found", "Recommendation": "Add SPF record"})
+                    if not mod_res.get("dmarc"):
+                        mod_findings.append({"Finding": "Missing DMARC", "Severity": "MEDIUM", "Description": "No DMARC record found", "Recommendation": "Add a DMARC policy record"})
                 elif mod == "waf":
                     if mod_res.get("waf_detected"):
                         mod_findings.append({
