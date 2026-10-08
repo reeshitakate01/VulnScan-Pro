@@ -13,6 +13,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     LoginManager, UserMixin, login_user, logout_user, login_required, current_user,
 )
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 import logging
 
@@ -49,6 +51,16 @@ db = SQLAlchemy(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+# Rate limiting: throttle auth brute-force and scan abuse. In-memory storage is
+# fine for a single-process deployment; point RATELIMIT_STORAGE_URI at Redis to
+# scale out. Disabled under tests so it never interferes with the suite.
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"),
+)
 
 # --- Models ---
 class User(UserMixin, db.Model):
@@ -423,6 +435,7 @@ def bg_run_scan(scan_id, url, selected_modules, webhook_url=None, email=None):
 
 # --- Auth ---
 @app.route('/register', methods=['GET', 'POST'])
+@limiter.limit("10 per minute", methods=["POST"])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -446,6 +459,7 @@ def register():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute", methods=["POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -522,6 +536,7 @@ def list_scans():
     } for s in scans])
 
 @app.route('/api/scan', methods=['POST'])
+@limiter.limit("30 per hour")
 @login_required
 def start_scan():
     data = request.get_json(silent=True) or {}

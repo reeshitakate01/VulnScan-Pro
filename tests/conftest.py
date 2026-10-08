@@ -21,6 +21,9 @@ if str(BACKEND) not in sys.path:
 def app_module():
     import app as appmod
     appmod.app.config["TESTING"] = True
+    # Rate limiting is disabled by default in tests so it never interferes;
+    # the dedicated rate-limit test re-enables it explicitly.
+    appmod.limiter.enabled = False
     return appmod
 
 
