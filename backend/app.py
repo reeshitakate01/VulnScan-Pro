@@ -17,7 +17,12 @@ app = Flask(__name__,
             template_folder=os.path.join(base_dir, 'frontend'),
             static_folder=os.path.join(base_dir, 'frontend', 'static'))
 app.secret_key = config.SECRET_KEY
-CORS(app)
+
+# CORS is OFF by default (same-origin). Previously `CORS(app)` allowed ANY
+# origin to call the API, letting any website drive scans via a victim's
+# browser. Enable explicitly with the CORS_ORIGINS env var when needed.
+if config.CORS_ORIGINS:
+    CORS(app, origins=config.CORS_ORIGINS)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -76,11 +81,13 @@ def bg_run_scan(scan_id, url, selected_modules, webhook_url=None, email=None):
     from report.pdf_generator import generate_pdf
     app_context = app.app_context()
 
+    # Acquire immediately before the try so the finally-release always pairs
+    # with it (nothing that can raise sits between acquire and try).
     scan_semaphore.acquire()
-    log_event(app_context, scan_id, f"Started scanning {url}")
-    results = {}
-    
     try:
+        log_event(app_context, scan_id, f"Started scanning {url}")
+        results = {}
+
         # ── WAF Detection (always runs first so other modules can note it) ──
         if "WAF Detection" in selected_modules:
             log_event(app_context, scan_id, "Detecting WAF / CDN...")
@@ -400,7 +407,7 @@ def list_scans():
 
 @app.route('/api/scan', methods=['POST'])
 def start_scan():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     url = data.get('url')
     modules = data.get('modules', [])
     webhook_url = data.get('webhook_url')
@@ -429,7 +436,7 @@ def start_scan():
 
 @app.route('/api/estimate', methods=['POST'])
 def estimate_time():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     selected_modules = data.get('modules', [])
     from scanner.time_estimator import TimeEstimator
     estimator = TimeEstimator()
@@ -484,9 +491,25 @@ def get_results(scan_id):
         'results_json': json.loads(scan.results_json) if scan.results_json else None
     })
 
+def _valid_scan_id(scan_id):
+    """Scan IDs are UUID4 strings. Reject anything else so a crafted id can
+    never be used to build an unexpected filesystem path."""
+    try:
+        uuid.UUID(str(scan_id))
+        return True
+    except (ValueError, AttributeError, TypeError):
+        return False
+
+
 @app.route('/api/report/<scan_id>')
 def download_report(scan_id):
-    filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'reports', f"{scan_id}.pdf")
+    if not _valid_scan_id(scan_id):
+        return jsonify({'error': 'Invalid scan id'}), 400
+    reports_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'reports'))
+    filepath = os.path.join(reports_dir, f"{scan_id}.pdf")
+    # Defence in depth: ensure the resolved path stays inside reports/.
+    if not os.path.abspath(filepath).startswith(reports_dir + os.sep):
+        return jsonify({'error': 'Invalid scan id'}), 400
     if os.path.exists(filepath):
         return send_file(filepath, as_attachment=True)
     return jsonify({'error': 'Report not found'}), 404

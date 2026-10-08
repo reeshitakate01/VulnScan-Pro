@@ -19,10 +19,14 @@ PAYLOADS = {
         "' UNION SELECT null,null,null--",
         "' UNION ALL SELECT 'SQLi','test',null--"
     ],
+    # Stacked-query probes are intentionally NON-DESTRUCTIVE. We only need to
+    # provoke a SQL error to confirm injection; we must never risk damaging the
+    # target. (Removed the previous DROP TABLE / INSERT / xp_cmdshell payloads,
+    # which could destroy data or run commands on a genuinely vulnerable host
+    # and added no detection value.)
     "stacked": [
-        "'; DROP TABLE users--",
-        "'; INSERT INTO users VALUES ('hacked','hacked')--",
-        "1; EXEC xp_cmdshell('whoami')--"
+        "'; SELECT 1--",
+        "1; SELECT 1--"
     ]
 }
 

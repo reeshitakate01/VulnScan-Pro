@@ -34,6 +34,14 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-insecure-key-change-me")
     DEBUG = _as_bool(os.getenv("FLASK_DEBUG"), default=False)
 
+    # --- CORS ---
+    # Default: same-origin only (no permissive CORS headers). Set CORS_ORIGINS
+    # to a comma-separated allowlist to enable cross-origin API access. The
+    # built-in frontend is served same-origin, so it needs no CORS.
+    CORS_ORIGINS = [
+        o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()
+    ]
+
     # --- Database ---
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///scans.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False

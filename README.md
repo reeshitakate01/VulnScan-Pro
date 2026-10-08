@@ -156,6 +156,12 @@ CI runs both on every push and pull request.
 
 ---
 
+## Security
+
+The scanner's own attack surface has been self-audited — see
+[`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md) for the full write-up
+(SSRF guard, CORS, non-destructive payloads, path handling, and more).
+
 ## Responsible use
 
 VulnScan Pro performs active security testing, including sending injection
