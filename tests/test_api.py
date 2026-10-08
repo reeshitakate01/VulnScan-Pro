@@ -1,12 +1,8 @@
-"""API-level tests using Flask's test client (no real scans are launched)."""
-import pytest
+"""API-level tests using Flask's test client (no real scans are launched).
 
-
-@pytest.fixture()
-def client():
-    import app as appmod
-    appmod.app.config["TESTING"] = True
-    return appmod.app.test_client()
+The `client` fixture (see conftest) is already authenticated; `anon_client`
+is not.
+"""
 
 
 def test_scan_requires_url(client):
@@ -41,3 +37,8 @@ def test_history_page_renders(client):
     resp = client.get("/history")
     assert resp.status_code == 200
     assert b"Scan History" in resp.data
+
+
+def test_api_requires_auth(anon_client):
+    assert anon_client.post("/api/scan", json={"url": "http://x"}).status_code == 401
+    assert anon_client.get("/api/scans").status_code == 401

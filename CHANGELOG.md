@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here.
 
+## [2.2.0] — 2026-10-08
+
+### Added
+- **User accounts** (register / login / logout) via Flask-Login with hashed
+  passwords; scans are owned by the creating user.
+- **Per-user scan history** and a **score-trend chart** over time.
+- **gunicorn** production server for the Docker image (gthread, single worker).
+
+### Changed
+- Scan APIs and pages now require authentication; results/reports are scoped to
+  the owner.
+- Hardened the session cookie (HttpOnly, SameSite=Lax).
+- Moved legacy slide decks / prototypes into `archive/` to tidy the repo root.
+
 ## [2.1.0] — 2026-10-08
 
 ### Added

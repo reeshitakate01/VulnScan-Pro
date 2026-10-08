@@ -10,8 +10,9 @@
 
 Good morning! The project is in a much stronger, interview-ready state.
 
-- ✅ **9 batches shipped** (incl. a security audit), each pushed to `main`.
-- ✅ **49 unit/API tests — all green.**
+- ✅ **Project completed** — all roadmap decisions implemented (see "Completion"
+  below): user accounts, per-user history + trend chart, repo cleanup, gunicorn.
+- ✅ **56 unit/API tests — all green.**
 - ✅ **GitHub Actions CI** (lint + tests) is set up and **passing**.
 - ✅ **End-to-end verified:** a live scan of `example.com` ran the full
   pipeline and produced a score (21/F), a PDF, and JSON + SARIF exports.
@@ -97,6 +98,24 @@ A review pass over the scanner's own attack surface (documented in
 
 ---
 
+## 🏁 Completion session (all open decisions implemented)
+
+- **Authentication** — register / login / logout (Flask-Login, hashed
+  passwords), hardened session cookie. Scans belong to the creating user;
+  results/reports/history are scoped to the owner (enforced + tested).
+- **Per-user history + score-trend chart** on `/history` (Chart.js line over time).
+- **Repo cleanup** — legacy slide decks and the `frontend_backup/` and `mock/`
+  prototypes moved into `archive/` (kept in-repo, out of root and the image).
+- **gunicorn** production server in the Docker image (local dev still uses
+  `python app.py`).
+- Now **56 tests**, CI green; full auth end-to-end flow verified.
+
+> **Note:** adding user accounts added a `user_id` column + a `User` table.
+> Your local `scans.db` from an earlier run should be deleted so the new schema
+> is created fresh (it's git-ignored and only holds scan history).
+
+---
+
 ## ▶️ How to run
 
 **Docker (easiest):**
@@ -133,25 +152,19 @@ git clone https://github.com/reeshitakate01/VulnScan-Pro.git C:\Users\Reeshita\V
 
 ---
 
-## ❓ Open questions / decisions for you
-1. **User accounts & auth** — I built scan *history* (shared, no login). Do you
-   want full multi-user login + per-user history? It's a bigger feature; I held
-   off to avoid half-implementing it. Say the word and I'll add it.
-2. **Repo cleanup** — I left your presentation/report files (`*.pptx`, `*.docx`,
-   `docs/`, `generate_*presentation*.py`) and the `frontend_backup/` and `mock/`
-   folders untouched. Want me to move them into a `docs/`/`archive/` folder to
-   tidy the repo root, or leave them for your PBL submission?
-3. **Demo certs** — I stopped tracking `vulnerable-webapp/{cert.pem,key.pem}`
-   (a committed private key is bad practice). They regenerate via
-   `vulnerable-webapp/generate_cert.py`. OK?
-4. **Production server** — currently the Flask dev server (fine for the demo).
-   Want me to add gunicorn for a more "production" story?
+## ✅ Open questions — now all resolved
+1. **User accounts & auth** — ✅ Implemented (register/login/logout, per-user
+   history + trend chart).
+2. **Repo cleanup** — ✅ Done (legacy decks/prototypes moved to `archive/`).
+   Your `docs/` and `VIVA_GUIDE.md` were left in place for your PBL submission.
+3. **Demo certs** — ✅ Untracked; they regenerate via `generate_cert.py`.
+4. **Production server** — ✅ gunicorn added for the Docker image.
 
-## 🗺️ Still pending (candidates for the next session)
-- Multi-user auth + per-user history and **trend charts** (score over time).
+## 🗺️ Intentionally left for later (documented, not blocking)
 - Scheduled / recurring scans.
-- Authenticated scanning (inject a session cookie/login).
-- Async engine (httpx + asyncio) + gunicorn.
+- Authenticated scanning (inject a target session cookie/login).
+- Async engine (httpx + asyncio) — a larger rewrite; skipped to keep the
+  current, well-tested synchronous engine stable.
 - More modules: subdomain takeover, directory brute-force, clickjacking PoC.
 
 ---

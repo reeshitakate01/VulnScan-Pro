@@ -41,10 +41,13 @@ shareable report.
   libraries, with an offline fallback table.
 - **OWASP Top-10 + CWE + CVSS** enrichment for every finding.
 - **Weighted A–F score** with a severity breakdown and interactive charts.
+- **User accounts** (register / login) with **per-user scan history** and a
+  **score-trend chart** over time.
 - **Exports:** PDF (executive report), JSON (programmatic), and
   **SARIF 2.1.0** (ingestible by GitHub code scanning / CI).
 - **Notifications:** optional Slack webhook and email delivery.
-- Runs fully in **Docker**, tested in **CI**, configured entirely via env vars.
+- Runs fully in **Docker** (gunicorn), tested in **CI**, configured entirely
+  via env vars.
 
 ---
 
@@ -123,9 +126,11 @@ All settings are read from environment variables (or a `.env` file). See
 ## Usage
 
 ### Web UI
-Open the app, enter a URL, choose modules, confirm authorisation, and watch the
-live execution log. When the scan completes you're taken to a dashboard with the
+On first run, open the app and **create an account** (register, then log in).
+Enter a URL, choose modules, confirm authorisation, and watch the live
+execution log. When the scan completes you're taken to a dashboard with the
 score, severity breakdown, detailed findings, per-module view and OWASP mapping.
+Your past scans and a score-trend chart live under **History**.
 
 ### API
 
@@ -175,10 +180,9 @@ so you can exercise every module safely on your own machine.
 
 ## Roadmap
 
-- User accounts + scan history and trend charts
 - Scheduled / recurring scans
-- Authenticated scanning (session/cookie injection)
-- Async engine (httpx + asyncio) and a production WSGI server (gunicorn)
+- Authenticated scanning (inject a target session/cookie to scan behind login)
+- Async engine (httpx + asyncio) for higher throughput
 - More modules: subdomain takeover, directory brute-force, clickjacking PoC
 
 ---

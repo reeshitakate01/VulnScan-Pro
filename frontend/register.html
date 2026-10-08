@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create account | VulnScan Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=2.1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-wrap { max-width: 420px; margin: 6vh auto; padding: 0 1rem; }
+        .auth-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 2.5rem 2rem; backdrop-filter: blur(12px); }
+        .auth-logo { text-align:center; font-family: var(--font-mono, monospace); font-weight:800;
+            font-size:1.4rem; margin-bottom: 0.3rem; }
+        .auth-logo i { color: var(--neon-green, #22c55e); }
+        .auth-sub { text-align:center; color: var(--text-muted,#9ca3af); font-size:0.85rem; margin-bottom:1.8rem; }
+        .auth-field { margin-bottom: 1rem; }
+        .auth-field label { display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;
+            color: var(--text-muted,#9ca3af); margin-bottom:0.4rem; font-family: var(--font-mono, monospace); }
+        .auth-field input { width:100%; padding:0.8rem 1rem; border-radius:10px; box-sizing:border-box;
+            background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12); color: var(--text-primary,#fff);
+            font-size:0.95rem; }
+        .auth-field input:focus { outline:none; border-color: var(--neon-green,#22c55e); }
+        .auth-hint { font-size:0.72rem; color: var(--text-muted,#9ca3af); margin-top:0.3rem; }
+        .auth-btn { width:100%; padding:0.85rem; border:none; border-radius:10px; cursor:pointer;
+            background: var(--neon-green,#22c55e); color:#06281a; font-weight:800; font-size:0.95rem; margin-top:0.5rem; }
+        .auth-alt { text-align:center; margin-top:1.3rem; font-size:0.85rem; color: var(--text-muted,#9ca3af); }
+        .auth-alt a { color: var(--neon-green,#22c55e); text-decoration:none; }
+        .flash { padding:0.7rem 1rem; border-radius:10px; margin-bottom:1rem; font-size:0.85rem;
+            background: rgba(239,68,68,0.12); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); }
+    </style>
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="grid-overlay"></div>
+    </div>
+    <main class="auth-wrap">
+        <div class="auth-card">
+            <div class="auth-logo"><i class="fas fa-shield-halved"></i> VulnScan Pro</div>
+            <div class="auth-sub">Create an account</div>
+            {% with messages = get_flashed_messages() %}
+              {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+            {% endwith %}
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="auth-field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required autofocus>
+                </div>
+                <div class="auth-field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" minlength="8" required>
+                    <div class="auth-hint">At least 8 characters.</div>
+                </div>
+                <button class="auth-btn" type="submit"><i class="fas fa-user-plus"></i> Create account</button>
+            </form>
+            <div class="auth-alt">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></div>
+        </div>
+    </main>
+</body>
+</html>

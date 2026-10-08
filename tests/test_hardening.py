@@ -1,5 +1,4 @@
-"""Tests for the security-hardening pass."""
-import pytest
+"""Tests for the security-hardening pass. `client` is authenticated (conftest)."""
 
 
 def test_sqli_payloads_are_non_destructive():
@@ -7,13 +6,6 @@ def test_sqli_payloads_are_non_destructive():
     flat = " ".join(p.upper() for cat in PAYLOADS.values() for p in cat)
     for forbidden in ("DROP TABLE", "XP_CMDSHELL", "INSERT INTO", "DELETE FROM", "TRUNCATE"):
         assert forbidden not in flat, f"destructive payload present: {forbidden}"
-
-
-@pytest.fixture()
-def client():
-    import app as appmod
-    appmod.app.config["TESTING"] = True
-    return appmod.app.test_client()
 
 
 def test_report_rejects_non_uuid_scan_id(client):

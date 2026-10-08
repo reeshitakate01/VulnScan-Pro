@@ -4,9 +4,16 @@ import threading
 import json
 import time
 from datetime import datetime
-from flask import Flask, request, jsonify, Response, send_file, render_template, send_from_directory
+from flask import (
+    Flask, request, jsonify, Response, send_file, render_template,
+    send_from_directory, redirect, url_for, flash,
+)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import (
+    LoginManager, UserMixin, login_user, logout_user, login_required, current_user,
+)
+from werkzeug.security import generate_password_hash, check_password_hash
 import logging
 
 from config import config
@@ -26,6 +33,9 @@ if config.CORS_ORIGINS:
 
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Harden the session cookie (defence-in-depth against CSRF/theft).
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # Bounded worker pool: cap simultaneous scans so a burst of requests cannot
 # exhaust threads/sockets. Acquired by each scan thread, released when done.
@@ -37,7 +47,36 @@ os.makedirs(os.path.join(base_dir, 'reports'), exist_ok=True)
 
 db = SQLAlchemy(app)
 
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
 # --- Models ---
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+
+@login_manager.unauthorized_handler
+def _unauthorized():
+    # API callers get a clean 401; browsers are redirected to the login page.
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Authentication required'}), 401
+    return redirect(url_for('login', next=request.path))
+
+
 class ScanTask(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     url = db.Column(db.String(2048), nullable=False)
@@ -47,6 +86,7 @@ class ScanTask(db.Model):
     summary = db.Column(db.Text, nullable=True)
     results_json = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
 
 class ScanEvent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -381,27 +421,97 @@ def bg_run_scan(scan_id, url, selected_modules, webhook_url=None, email=None):
     finally:
         scan_semaphore.release()
 
-# --- API Endpoints ---
+# --- Auth ---
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        email = (request.form.get('email') or '').strip().lower()
+        password = request.form.get('password') or ''
+        if not email or not password:
+            flash('Email and password are required.', 'error')
+        elif len(password) < 8:
+            flash('Password must be at least 8 characters.', 'error')
+        elif User.query.filter_by(email=email).first():
+            flash('An account with that email already exists.', 'error')
+        else:
+            user = User(email=email)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+            return redirect(url_for('index'))
+    return render_template('register.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        email = (request.form.get('email') or '').strip().lower()
+        password = request.form.get('password') or ''
+        user = User.query.filter_by(email=email).first()
+        if user and user.check_password(password):
+            login_user(user)
+            nxt = request.args.get('next')
+            # Only allow local redirects (open-redirect guard).
+            if nxt and nxt.startswith('/') and not nxt.startswith('//'):
+                return redirect(nxt)
+            return redirect(url_for('index'))
+        flash('Invalid email or password.', 'error')
+    return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+
+# --- Pages ---
 @app.route('/')
+@login_required
 def index():
-    return render_template('index.html')
+    return render_template('index.html', user_email=current_user.email)
 
 @app.route('/results/<scan_id>')
+@login_required
 def results_page(scan_id):
+    scan = ScanTask.query.get_or_404(scan_id)
+    if scan.user_id is not None and scan.user_id != current_user.id:
+        return jsonify({'error': 'Not found'}), 404
     return render_template('results.html', scan_id=scan_id)
 
 @app.route('/preview')
+@login_required
 def preview_page():
     return render_template('preview.html')
 
 @app.route('/history')
+@login_required
 def history_page():
-    return render_template('history.html')
+    return render_template('history.html', user_email=current_user.email)
+
+
+def _owned_scan_or_404(scan_id):
+    """Fetch a scan and enforce that it belongs to the current user."""
+    scan = ScanTask.query.get_or_404(scan_id)
+    if scan.user_id is not None and scan.user_id != current_user.id:
+        return None
+    return scan
+
 
 @app.route('/api/scans')
+@login_required
 def list_scans():
-    """Recent scans, newest first — powers the history dashboard."""
-    scans = ScanTask.query.order_by(ScanTask.created_at.desc()).limit(50).all()
+    """The current user's scans, newest first — powers the history dashboard."""
+    scans = (ScanTask.query
+             .filter_by(user_id=current_user.id)
+             .order_by(ScanTask.created_at.desc())
+             .limit(100).all())
     return jsonify([{
         'id': s.id,
         'url': s.url,
@@ -412,6 +522,7 @@ def list_scans():
     } for s in scans])
 
 @app.route('/api/scan', methods=['POST'])
+@login_required
 def start_scan():
     data = request.get_json(silent=True) or {}
     url = data.get('url')
@@ -431,16 +542,17 @@ def start_scan():
         return jsonify({'error': f'Target not allowed: {reason}'}), 400
 
     scan_id = str(uuid.uuid4())
-    
-    new_scan = ScanTask(id=scan_id, url=url, status='running')
+
+    new_scan = ScanTask(id=scan_id, url=url, status='running', user_id=current_user.id)
     db.session.add(new_scan)
     db.session.commit()
-    
+
     threading.Thread(target=bg_run_scan, args=(scan_id, url, modules, webhook_url, email)).start()
-    
+
     return jsonify({'scan_id': scan_id, 'status': 'running'}), 202
 
 @app.route('/api/estimate', methods=['POST'])
+@login_required
 def estimate_time():
     data = request.get_json(silent=True) or {}
     selected_modules = data.get('modules', [])
@@ -450,7 +562,10 @@ def estimate_time():
     return jsonify(estimate)
 
 @app.route('/api/scan/<scan_id>/stream')
+@login_required
 def stream_scan(scan_id):
+    if _owned_scan_or_404(scan_id) is None:
+        return jsonify({'error': 'Not found'}), 404
     def generate():
         last_event_id = 0
         start_ts = time.time()
@@ -485,8 +600,11 @@ def stream_scan(scan_id):
     return Response(generate(), mimetype='text/event-stream')
 
 @app.route('/api/scan/<scan_id>/results')
+@login_required
 def get_results(scan_id):
-    scan = ScanTask.query.get_or_404(scan_id)
+    scan = _owned_scan_or_404(scan_id)
+    if scan is None:
+        return jsonify({'error': 'Not found'}), 404
     return jsonify({
         'id': scan.id,
         'url': scan.url,
@@ -508,9 +626,12 @@ def _valid_scan_id(scan_id):
 
 
 @app.route('/api/report/<scan_id>')
+@login_required
 def download_report(scan_id):
     if not _valid_scan_id(scan_id):
         return jsonify({'error': 'Invalid scan id'}), 400
+    if _owned_scan_or_404(scan_id) is None:
+        return jsonify({'error': 'Not found'}), 404
     reports_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'reports'))
     filepath = os.path.join(reports_dir, f"{scan_id}.pdf")
     # Defence in depth: ensure the resolved path stays inside reports/.
@@ -532,17 +653,23 @@ def _scan_to_dict(scan):
 
 
 @app.route('/api/report/<scan_id>/json')
+@login_required
 def download_report_json(scan_id):
     """Structured JSON export for programmatic use."""
-    scan = ScanTask.query.get_or_404(scan_id)
+    scan = _owned_scan_or_404(scan_id)
+    if scan is None:
+        return jsonify({'error': 'Not found'}), 404
     from report.exporters import build_json_export
     return jsonify(build_json_export(_scan_to_dict(scan)))
 
 
 @app.route('/api/report/<scan_id>/sarif')
+@login_required
 def download_report_sarif(scan_id):
     """SARIF 2.1.0 export (ingestible by GitHub code scanning / CI)."""
-    scan = ScanTask.query.get_or_404(scan_id)
+    scan = _owned_scan_or_404(scan_id)
+    if scan is None:
+        return jsonify({'error': 'Not found'}), 404
     from report.exporters import build_sarif
     payload = json.dumps(build_sarif(_scan_to_dict(scan)), indent=2)
     return Response(
