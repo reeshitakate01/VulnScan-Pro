@@ -31,6 +31,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # exhaust threads/sockets. Acquired by each scan thread, released when done.
 scan_semaphore = threading.BoundedSemaphore(config.MAX_CONCURRENT_SCANS)
 
+# Ensure the reports directory exists at import time too, so it is created
+# under gunicorn (which never runs the __main__ block below).
+os.makedirs(os.path.join(base_dir, 'reports'), exist_ok=True)
+
 db = SQLAlchemy(app)
 
 # --- Models ---

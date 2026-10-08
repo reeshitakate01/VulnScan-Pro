@@ -20,4 +20,5 @@ WORKDIR /app/backend
 
 EXPOSE 5000
 
-CMD ["python", "app.py"]
+# Production server (gthread worker — see gunicorn.conf.py for why 1 worker).
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "app:app"]

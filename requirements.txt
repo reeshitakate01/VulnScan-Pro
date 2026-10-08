@@ -9,3 +9,4 @@ dnspython~=2.6
 reportlab~=4.1
 jsbeautifier~=1.15
 python-dotenv~=1.0
+gunicorn~=23.0 ; sys_platform != "win32"
