@@ -1,14 +1,18 @@
 :root {
-    --bg-dark: #050505;
-    --bg-card: rgba(15, 17, 21, 0.65);
-    --bg-input: rgba(0, 0, 0, 0.4);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(0, 255, 65, 0.4);
-    
+    --bg-dark: #06070a;
+    --bg-deep: #0b0e14;
+    --bg-card: rgba(20, 24, 33, 0.72);
+    --bg-card-hi: rgba(32, 38, 51, 0.55);
+    --bg-input: rgba(0, 0, 0, 0.35);
+    --border-color: rgba(255, 255, 255, 0.10);
+    --border-hover: rgba(0, 255, 120, 0.45);
+
     /* Neon Colors */
-    --neon-green: #00ff41;
-    --neon-blue: #00e1ff;
-    --neon-purple: #bd00ff;
+    --neon-green: #00ff66;
+    --neon-blue: #22d3ee;
+    --neon-purple: #a855f7;
+    --accent-gradient: linear-gradient(135deg, #00ff88 0%, #22d3ee 58%, #4f8bff 100%);
+    --glow-green: rgba(0, 255, 120, 0.35);
     
     /* Text */
     --text-primary: #ffffff;
@@ -29,6 +33,11 @@
 
 body {
     background-color: var(--bg-dark);
+    background-image:
+        radial-gradient(1100px 720px at 10% -12%, rgba(0, 255, 136, 0.12), transparent 58%),
+        radial-gradient(1000px 820px at 112% 8%, rgba(34, 211, 238, 0.11), transparent 55%),
+        radial-gradient(1000px 900px at 50% 118%, rgba(124, 58, 237, 0.12), transparent 60%);
+    background-attachment: fixed;
     color: var(--text-primary);
     font-family: var(--font-main);
     min-height: 100vh;
@@ -54,8 +63,8 @@ body {
 .glow-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.15;
+    filter: blur(110px);
+    opacity: 0.22;
     animation: float 20s infinite ease-in-out alternate;
     transform: translateZ(0);
     will-change: transform;
@@ -63,7 +72,7 @@ body {
 
 .orb-1 { width: 600px; height: 600px; background: var(--neon-green); top: -200px; left: -100px; animation-delay: 0s; }
 .orb-2 { width: 500px; height: 500px; background: var(--neon-blue); bottom: -100px; right: -200px; animation-delay: -5s; }
-.orb-3 { width: 400px; height: 400px; background: var(--neon-purple); top: 40%; left: 40%; opacity: 0.08; animation-delay: -10s; }
+.orb-3 { width: 420px; height: 420px; background: var(--neon-purple); top: 40%; left: 40%; opacity: 0.16; animation-delay: -10s; }
 
 .grid-overlay {
     position: absolute;
@@ -474,3 +483,93 @@ body {
     .modules-grid { grid-template-columns: 1fr 1fr; }
     .notif-grid { grid-template-columns: 1fr; }
 }
+
+/* ───────────────────────────────────────────────────────────
+   UI refresh — richer depth & gradient accents (dark theme kept)
+   ─────────────────────────────────────────────────────────── */
+
+.subtitle { color: #b6c2d6; }
+
+/* Logo: tri-colour gradient + soft glow */
+.logo-text {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 2px 22px rgba(0, 255, 136, 0.25));
+}
+
+/* Glass panel: gentle top highlight, glowing accent edge, deeper shadow */
+.glass-panel {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 140px),
+        var(--bg-card);
+    box-shadow:
+        0 25px 60px -20px rgba(0, 0, 0, 0.75),
+        0 1px 0 rgba(255, 255, 255, 0.06) inset,
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+.glass-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 24px 24px 0 0;
+    background: var(--accent-gradient);
+    opacity: 0.85;
+}
+.glass-panel:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow:
+        0 30px 70px -20px rgba(0, 0, 0, 0.8),
+        0 0 55px -12px var(--glow-green);
+}
+
+/* Inputs: a touch lighter, clear focus glow */
+.cyber-input {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.09);
+}
+.cyber-input:focus {
+    background: rgba(0, 255, 120, 0.04);
+    box-shadow: 0 0 0 1px rgba(0, 255, 120, 0.35), 0 0 26px -6px var(--glow-green);
+}
+
+/* Module cards: subtle surface, lift on hover, accent when selected */
+.cyber-checkbox-label {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.cyber-checkbox-label:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 255, 120, 0.28);
+    box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.7);
+}
+label.cyber-checkbox-label:has(.cyber-checkbox:checked) {
+    border-color: rgba(0, 255, 120, 0.35);
+    background: linear-gradient(180deg, rgba(0, 255, 120, 0.09), rgba(0, 255, 120, 0.02));
+}
+.cyber-checkbox:checked ~ .checkbox-text { color: #eafff2; }
+
+.module-count {
+    background: rgba(34, 211, 238, 0.12);
+    border: 1px solid rgba(34, 211, 238, 0.25);
+    color: var(--neon-blue);
+}
+
+/* Primary action button: gradient fill with glow */
+.cyber-button {
+    background: var(--accent-gradient);
+    border: none;
+    color: #04120b;
+    box-shadow: 0 12px 32px -10px var(--glow-green), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+.cyber-button:hover {
+    color: #04120b;
+    filter: brightness(1.08);
+    transform: translateY(-3px);
+    box-shadow: 0 18px 44px -10px var(--glow-green), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+}
+
+/* Progress bar: brighter track fill */
+.progress-fill { background: var(--accent-gradient); }
