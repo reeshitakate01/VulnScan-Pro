@@ -42,7 +42,7 @@ shareable report.
 - **OWASP Top-10 + CWE + CVSS** enrichment for every finding.
 - **Weighted A–F score** with a severity breakdown and interactive charts.
 - **User accounts** (register / login) with **per-user scan history** and a
-  **score-trend chart** over time.
+  **score-trend chart** over time; **rate-limited** auth and scan endpoints.
 - **Exports:** PDF (executive report), JSON (programmatic), and
   **SARIF 2.1.0** (ingestible by GitHub code scanning / CI).
 - **Notifications:** optional Slack webhook and email delivery.
@@ -118,6 +118,8 @@ All settings are read from environment variables (or a `.env` file). See
 | `SCAN_MAX_DURATION` | `600` | Hard per-scan time ceiling (seconds). |
 | `HTTP_TIMEOUT` | `8` | Default outbound request timeout. |
 | `OSV_ENABLED` | `1` | Query OSV.dev for live CVEs. |
+| `CORS_ORIGINS` | — | Comma-separated allowlist to enable cross-origin API access (off by default). |
+| `RATELIMIT_STORAGE_URI` | `memory://` | Rate-limit backend (point at Redis to scale out). |
 | `SECRET_KEY` | dev key | Flask secret — set a real value in production. |
 | `SMTP_*` | localhost:1025 | Email notification settings. |
 

@@ -19,8 +19,9 @@ _Last updated: 2026-10-08._
 | 7 | Malformed request body caused a 500 | Low | ✅ Fixed |
 | 8 | Secrets committed to the repo (private key, DB) | High | ✅ Fixed |
 | 9 | Unbounded scan concurrency + non-terminating SSE loop | Medium | ✅ Fixed |
+| 10 | No authentication on API / results | Medium | ✅ Fixed |
+| 11 | No rate limiting (auth brute-force / scan abuse) | Medium | ✅ Fixed |
 | A | SSRF guard is resolve-time (DNS-rebinding TOCTOU) | Low | 📝 Documented |
-| B | No authentication on API / results | Medium | 📝 Documented |
 | C | Reflection-only XSS detection (possible false positives) | Low | 📝 Documented |
 | D | Time-based blind SQLi uses a large `randomblob` on SQLite | Low | 📝 Documented |
 
@@ -69,6 +70,15 @@ demo cert regenerates via `generate_cert.py`.
 and the SSE progress stream has a hard `SCAN_MAX_DURATION` ceiling, so a stuck
 scan can't loop forever or exhaust threads.
 
+**10. Authentication & access control.** The app now requires login
+(Flask-Login, hashed passwords). Every scan is owned by its creator, and
+results / reports / history are scoped to the owner (404 otherwise), so one user
+cannot read another's data even with a scan ID.
+
+**11. Rate limiting (CWE-307).** Flask-Limiter throttles login/register
+(10/min) and scan starts (30/hour) to blunt credential brute-force and scan
+abuse.
+
 ## Documented (accepted for now / roadmap)
 
 **A. DNS-rebinding TOCTOU.** `SAFE_MODE` validates at request time, but each
@@ -76,10 +86,6 @@ scanner module re-resolves the host when it connects. An attacker controlling
 DNS could pass validation and then rebind to an internal IP. A full fix pins the
 resolved IP and forces connections to it. Low risk for the intended use (you
 scan hosts you own), but noted.
-
-**B. No authentication.** Anyone who can reach the server can start a scan or
-read a result by its (unguessable UUID) ID. Acceptable for a local / single-user
-deployment; multi-user auth is on the roadmap.
 
 **C. Reflection-only XSS.** The XSS module flags a payload reflected unescaped;
 it does not confirm script execution, so false positives are possible. A

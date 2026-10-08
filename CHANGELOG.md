@@ -8,6 +8,7 @@ All notable changes to this project are documented here.
 - **User accounts** (register / login / logout) via Flask-Login with hashed
   passwords; scans are owned by the creating user.
 - **Per-user scan history** and a **score-trend chart** over time.
+- **Rate limiting** (Flask-Limiter) on auth (10/min) and scan start (30/hour).
 - **gunicorn** production server for the Docker image (gthread, single worker).
 
 ### Changed

@@ -12,7 +12,7 @@ Good morning! The project is in a much stronger, interview-ready state.
 
 - ✅ **Project completed** — all roadmap decisions implemented (see "Completion"
   below): user accounts, per-user history + trend chart, repo cleanup, gunicorn.
-- ✅ **56 unit/API tests — all green.**
+- ✅ **58 unit/API tests — all green.**
 - ✅ **GitHub Actions CI** (lint + tests) is set up and **passing**.
 - ✅ **End-to-end verified:** a live scan of `example.com` ran the full
   pipeline and produced a score (21/F), a PDF, and JSON + SARIF exports.
@@ -108,7 +108,9 @@ A review pass over the scanner's own attack surface (documented in
   prototypes moved into `archive/` (kept in-repo, out of root and the image).
 - **gunicorn** production server in the Docker image (local dev still uses
   `python app.py`).
-- Now **56 tests**, CI green; full auth end-to-end flow verified.
+- **Rate limiting** (Flask-Limiter) on login/register (10/min) and scan start
+  (30/hour) to blunt brute-force and abuse.
+- Now **58 tests**, CI green; full auth end-to-end flow verified.
 
 > **Note:** adding user accounts added a `user_id` column + a `User` table.
 > Your local `scans.db` from an earlier run should be deleted so the new schema
