@@ -10,8 +10,8 @@
 
 Good morning! The project is in a much stronger, interview-ready state.
 
-- ✅ **8 batches shipped**, each committed and pushed to `main`.
-- ✅ **42 unit/API tests — all green.**
+- ✅ **9 batches shipped** (incl. a security audit), each pushed to `main`.
+- ✅ **49 unit/API tests — all green.**
 - ✅ **GitHub Actions CI** (lint + tests) is set up and **passing**.
 - ✅ **End-to-end verified:** a live scan of `example.com` ran the full
   pipeline and produced a score (21/F), a PDF, and JSON + SARIF exports.
@@ -71,8 +71,20 @@ table, API reference, responsible-use disclaimer, roadmap, CI badge) and fixed
 grade) with links to each result. History links added to home & results pages.
 
 ### Batch H — Test coverage & community docs — `64c9fcc`
-Mocked tests for the http_methods/recon modules and the OWASP mapper (now
-**42 tests**), plus `SECURITY.md`, `CONTRIBUTING.md` and `CHANGELOG.md`.
+Mocked tests for the http_methods/recon modules and the OWASP mapper, plus
+`SECURITY.md`, `CONTRIBUTING.md` and `CHANGELOG.md`.
+
+### Batch I — Security audit & bug fixes — `94a3c2e`, `83ac15c`
+A review pass over the scanner's own attack surface (documented in
+[`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md)):
+- **CORS off by default** (was permissive — any site could drive the API).
+- **Removed destructive SQLi payloads** (`DROP TABLE`/`INSERT`/`xp_cmdshell`)
+  that could damage a target and added no detection value.
+- Fixed a **concurrency-semaphore leak**, added **UUID validation + path
+  containment** on report downloads, and **defensive body parsing**.
+- **Bug fix:** every DNS scan wrongly reported "Missing SPF" (wrong field);
+  missing DMARC now also shows as a finding.
+- Now **49 tests**, all green; end-to-end scan re-verified.
 
 ---
 
@@ -145,9 +157,10 @@ git clone https://github.com/reeshitakate01/VulnScan-Pro.git C:\Users\Reeshita\V
 ---
 
 ## 📊 By the numbers
-- 9 commits (1 initial + 8 feature batches).
+- 11 commits (1 initial + 9 feature/audit batches + report updates).
 - +4 new scanner modules (CORS, HTTP methods, recon) and a CVE-lookup module.
 - +2 new export formats (JSON, SARIF).
-- 42 automated tests, CI pipeline, Docker, and a full README.
+- A security self-audit (9 issues fixed) + 1 scoring bug fixed.
+- 49 automated tests, CI pipeline, Docker, and a full README.
 
 _This file was written by the overnight build and reflects the final state._
