@@ -5,14 +5,9 @@ exclude = [
     "venv",
     ".venv",
     "frontend",
-    "frontend_backup",
-    "mock",
+    "archive",
     "docs",
     "reports",
-    "generate_presentation.py",
-    "generate_presentation_simple.py",
-    "generate_pbl_presentation.py",
-    "convert_to_docx.py",
 ]
 
 [lint]
