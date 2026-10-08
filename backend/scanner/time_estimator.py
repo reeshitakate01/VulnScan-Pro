@@ -8,6 +8,7 @@ MODULE_BASE_TIMES = {
     "dns_scanner":         8,   # Multiple DNS queries
     "tech_fingerprint":    4,   # Header + HTML analysis
     "js_analyzer":        15,   # Download + parse JS files
+    "js_analysis":        15,   # (alias used by the frontend module map)
     "dir_bruteforce":     20,   # 200 paths checked
     "cors_scanner":        3,   # Single request with Origin header
     "http_methods_scanner": 4,  # OPTIONS + TRACE
@@ -45,7 +46,7 @@ class TimeEstimator:
         ]
         
         # Phase 2: runs after crawler completes (depends on crawl output)
-        phase2_modules = ["xss_scanner", "sql_injection", "js_analyzer"]
+        phase2_modules = ["xss_scanner", "sql_injection", "js_analyzer", "js_analysis"]
         
         # Crawler runs first, independently
         crawler_time = MODULE_BASE_TIMES.get("crawler", 20) if "crawler" in selected_modules else 0
