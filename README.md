@@ -12,6 +12,10 @@ site and runs a battery of scanner modules in the background — streaming
 progress to the browser in real time — then grades the target and produces a
 shareable report.
 
+![VulnScan Pro demo](docs/demo.gif)
+
+*Login → scan dashboard → results (score, severity, OWASP) → detailed findings → per-user history & score trend.*
+
 > ⚠️ **Authorised testing only.** Scan systems you own or have explicit, written
 > permission to test. See [Responsible use](#responsible-use).
 
