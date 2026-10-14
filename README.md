@@ -106,6 +106,14 @@ cd backend && python app.py
 
 No C/C++ build tools are required.
 
+### Deploy a public demo (AWS)
+
+A **locked-down demo** (scanning restricted to the bundled lab, so it can't be
+abused against third-party sites) can be deployed to an EC2 free-tier instance.
+See **[deploy/AWS_DEPLOY.md](deploy/AWS_DEPLOY.md)** — it ships a
+`docker-compose.aws.yml` that runs the scanner + an internal lab with
+`SCAN_ALLOWLIST` enabled.
+
 ---
 
 ## Configuration
@@ -118,6 +126,8 @@ All settings are read from environment variables (or a `.env` file). See
 | `FLASK_DEBUG` | `0` | Enable Flask debug (**keep off** in production). |
 | `SAFE_MODE` | `1` | SSRF guard: block internal/reserved targets. |
 | `SAFE_MODE_ALLOW` | — | Comma-separated hosts allowed despite `SAFE_MODE` (e.g. a lab host). |
+| `SCAN_ALLOWLIST` | — | Demo lockdown: if set, ONLY these hosts may be scanned (everything else is refused). |
+| `DEMO_TARGET_URL` | — | Pre-fills the scan box (used with `SCAN_ALLOWLIST` for a public demo). |
 | `MAX_CONCURRENT_SCANS` | `3` | Bounded worker pool size. |
 | `SCAN_MAX_DURATION` | `600` | Hard per-scan time ceiling (seconds). |
 | `HTTP_TIMEOUT` | `8` | Default outbound request timeout. |

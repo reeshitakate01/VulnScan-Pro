@@ -29,3 +29,15 @@ def test_estimate_handles_empty_body(client):
 def test_cors_not_permissive_by_default(client):
     resp = client.get("/")
     assert resp.headers.get("Access-Control-Allow-Origin") != "*"
+
+
+def test_demo_lockdown_blocks_other_targets(client):
+    from config import config
+    saved = config.SCAN_ALLOWLIST
+    config.SCAN_ALLOWLIST = ["vulnlab"]
+    try:
+        resp = client.post("/api/scan", json={"url": "http://example.com"})
+        assert resp.status_code == 403
+        assert "locked-down demo" in resp.get_json()["error"].lower()
+    finally:
+        config.SCAN_ALLOWLIST = saved

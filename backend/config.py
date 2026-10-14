@@ -46,6 +46,20 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///scans.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # --- Demo lockdown ---
+    # When SCAN_ALLOWLIST is set (comma-separated hostnames), the scanner will
+    # ONLY scan those hosts and refuses everything else. This turns a public
+    # instance into a safe showcase (e.g. it can only scan the bundled lab),
+    # so strangers can't weaponise it against third-party sites. Empty = no
+    # restriction (normal operation).
+    SCAN_ALLOWLIST = [
+        h.strip().lower()
+        for h in os.getenv("SCAN_ALLOWLIST", "").split(",")
+        if h.strip()
+    ]
+    # Optional URL to pre-fill the scan box with in demo mode.
+    DEMO_TARGET_URL = os.getenv("DEMO_TARGET_URL", "")
+
     # --- Scan orchestration ---
     # Bounded worker pool prevents unbounded thread creation under load.
     MAX_CONCURRENT_SCANS = _as_int(os.getenv("MAX_CONCURRENT_SCANS"), 3)

@@ -18,6 +18,8 @@ from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 import logging
 
+from urllib.parse import urlparse
+
 from config import config
 from scanner.safe_requests import validate_target
 
@@ -489,7 +491,12 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', user_email=current_user.email)
+    return render_template(
+        'index.html',
+        user_email=current_user.email,
+        demo_target=config.DEMO_TARGET_URL,
+        scan_allowlist=config.SCAN_ALLOWLIST,
+    )
 
 @app.route('/results/<scan_id>')
 @login_required
@@ -550,6 +557,14 @@ def start_scan():
         
     if not url.startswith('http://') and not url.startswith('https://'):
         url = 'http://' + url
+
+    # Demo lockdown: if an allowlist is configured, only those hosts may be
+    # scanned (keeps a public instance from being weaponised against others).
+    if config.SCAN_ALLOWLIST:
+        host = (urlparse(url).hostname or '').lower()
+        if host not in config.SCAN_ALLOWLIST:
+            allowed = ', '.join(config.SCAN_ALLOWLIST)
+            return jsonify({'error': f'This is a locked-down demo. You may only scan: {allowed}'}), 403
 
     # SSRF guard: refuse internal/reserved targets unless explicitly allowed.
     ok, reason = validate_target(url)

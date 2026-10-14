@@ -32,14 +32,22 @@
         </header>
 
         <div class="glass-panel main-panel">
+            {% if scan_allowlist %}
+            <div style="background:rgba(34,211,238,0.08); border:1px solid rgba(34,211,238,0.3); border-radius:12px; padding:0.9rem 1.2rem; margin-bottom:1.5rem; font-size:0.85rem; color:#b6c2d6;">
+                <i class="fas fa-lock" style="color:var(--neon-blue,#22d3ee);"></i>
+                <b>Locked-down demo.</b> For safety, this public instance can only scan its bundled test target:
+                <code style="color:var(--neon-blue,#22d3ee);">{{ scan_allowlist|join(', ') }}</code>.
+                Run it locally to scan your own authorized targets.
+            </div>
+            {% endif %}
             <form id="scanForm" class="scan-form">
-                
+
                 <!-- Target Input -->
                 <div class="input-group target-input-group">
                     <div class="input-icon">
                         <i class="fas fa-crosshairs"></i>
                     </div>
-                    <input type="url" id="targetUrl" class="cyber-input" placeholder="Enter target URL (e.g., https://example.com) ..." required>
+                    <input type="url" id="targetUrl" class="cyber-input" placeholder="Enter target URL (e.g., https://example.com) ..." value="{{ demo_target or '' }}" required>
                     <div class="input-glow"></div>
                 </div>
 

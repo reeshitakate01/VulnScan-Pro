@@ -1,0 +1,43 @@
+# Locked-down public demo: the scanner can ONLY scan the bundled vulnerable
+# lab (SCAN_ALLOWLIST=vulnlab). The lab is internal — never exposed to the
+# internet — so strangers cannot weaponise the scanner against other sites.
+#
+# Run from the repo root:
+#   docker compose -f deploy/docker-compose.aws.yml up -d --build
+name: vulnscan-demo
+
+services:
+  vulnlab:
+    build:
+      context: ../vulnerable-webapp
+    container_name: vulnscan-lab
+    expose:
+      - "5001"          # reachable only on the internal compose network
+    restart: unless-stopped
+
+  scanner:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: vulnscan-scanner
+    env_file:
+      - ../.env          # supplies SECRET_KEY (create this; see .env.aws.example)
+    environment:
+      SAFE_MODE: "1"
+      SAFE_MODE_ALLOW: "vulnlab"          # let the SSRF guard reach the lab
+      SCAN_ALLOWLIST: "vulnlab"           # and ONLY the lab
+      DEMO_TARGET_URL: "http://vulnlab:5001"
+      FLASK_DEBUG: "0"
+      MAX_CONCURRENT_SCANS: "2"
+    ports:
+      - "80:5000"        # public HTTP; put Caddy/ALB in front for HTTPS
+    volumes:
+      - scanner-data:/app/backend/instance   # persist the users/scans DB
+      - scanner-reports:/app/reports         # persist generated PDFs
+    depends_on:
+      - vulnlab
+    restart: unless-stopped
+
+volumes:
+  scanner-data:
+  scanner-reports:
