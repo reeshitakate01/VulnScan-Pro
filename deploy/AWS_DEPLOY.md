@@ -58,16 +58,15 @@ newgrp docker   # or log out and back in
 
 ## 4. Get the code
 
-The repo is private, so clone it with a **fine-grained GitHub token**
-(GitHub → Settings → Developer settings → Fine-grained tokens → read-only,
-this repo only):
+The repo is public, so just clone it — no credentials needed:
 
 ```bash
-git clone https://<YOUR_TOKEN>@github.com/reeshitakate01/VulnScan-Pro.git
+git clone https://github.com/reeshitakate01/VulnScan-Pro.git
 cd VulnScan-Pro
 ```
 
-*(Alternatives: make the repo public, or `scp -r` the folder up from your laptop.)*
+*(If you later make the repo private, clone it with a fine-grained, read-only
+GitHub token instead: `git clone https://<YOUR_TOKEN>@github.com/reeshitakate01/VulnScan-Pro.git`.)*
 
 ## 5. Set the secret
 
