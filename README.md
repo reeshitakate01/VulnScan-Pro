@@ -1,11 +1,16 @@
 # VulnScan Pro
 
+[![Live Demo](https://img.shields.io/badge/live%20demo-try%20it-22c55e)](https://reeshita-vulnscan.duckdns.org)
 [![CI](https://github.com/reeshitakate01/VulnScan-Pro/actions/workflows/ci.yml/badge.svg)](https://github.com/reeshitakate01/VulnScan-Pro/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 > A web application vulnerability scanner with a live scanning dashboard,
 > OWASP Top-10 mapping, an A–F security score, and PDF / JSON / SARIF reports.
+
+**🔗 Live demo:** **https://reeshita-vulnscan.duckdns.org** — register a free
+account and run a scan against the built-in test lab. *(Hosted on AWS EC2 with
+Docker + HTTPS; the scanner is locked down so it can only scan the demo lab.)*
 
 You enter a target URL, pick the checks you want, and VulnScan Pro crawls the
 site and runs a battery of scanner modules in the background — streaming
