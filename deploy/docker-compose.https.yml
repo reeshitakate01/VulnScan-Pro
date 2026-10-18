@@ -1,0 +1,64 @@
+# HTTPS variant: same locked-down demo, but fronted by Caddy which obtains a
+# free Let's Encrypt certificate automatically. Requires:
+#   * a domain whose A record points at this server's public IP
+#   * the domain set as SITE_DOMAIN in the repo-root .env
+#   * ports 80 AND 443 open in the EC2 security group
+#
+# Run from the repo root:
+#   sudo docker compose -f deploy/docker-compose.aws.yml down        # free port 80
+#   sudo docker compose -f deploy/docker-compose.https.yml up -d --build
+name: vulnscan-demo
+
+services:
+  vulnlab:
+    build:
+      context: ../vulnerable-webapp
+    container_name: vulnscan-lab
+    expose:
+      - "5001"
+    restart: unless-stopped
+
+  scanner:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: vulnscan-scanner
+    env_file:
+      - ../.env
+    environment:
+      SAFE_MODE: "1"
+      SAFE_MODE_ALLOW: "vulnlab"
+      SCAN_ALLOWLIST: "vulnlab"
+      DEMO_TARGET_URL: "http://vulnlab:5001"
+      FLASK_DEBUG: "0"
+      MAX_CONCURRENT_SCANS: "2"
+    expose:
+      - "5000"          # internal only; Caddy is the public entry point
+    volumes:
+      - scanner-data:/app/backend/instance
+      - scanner-reports:/app/reports
+    depends_on:
+      - vulnlab
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    container_name: vulnscan-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - ../.env          # supplies SITE_DOMAIN (and SECRET_KEY, unused here)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - scanner
+    restart: unless-stopped
+
+volumes:
+  scanner-data:
+  scanner-reports:
+  caddy-data:
+  caddy-config:

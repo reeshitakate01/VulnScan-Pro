@@ -1,0 +1,6 @@
+# Caddy automatically obtains + renews a free Let's Encrypt certificate for
+# this domain and reverse-proxies to the scanner container. The domain is read
+# from the SITE_DOMAIN environment variable (set in the repo-root .env).
+{$SITE_DOMAIN} {
+	reverse_proxy scanner:5000
+}

@@ -115,30 +115,30 @@ docker compose -f deploy/docker-compose.aws.yml logs --tail=100 scanner
 
 ## Optional: HTTPS with a domain (recommended if you'll share the link widely)
 
-Login over plain HTTP sends the password in cleartext. If you have a domain,
-point an `A` record at the EC2 IP, open **port 443** in the security group, and
-add a Caddy reverse proxy (automatic Let's Encrypt). Create `deploy/Caddyfile`:
+Plain HTTP sends the login password in cleartext and shows a "Not secure" label.
+A ready-made HTTPS setup is included — it fronts the scanner with **Caddy**,
+which obtains and renews a free **Let's Encrypt** certificate automatically
+(`deploy/docker-compose.https.yml` + `deploy/Caddyfile`).
 
-```
-your-domain.com {
-    reverse_proxy scanner:5000
-}
+**1. Get a hostname pointing at this server.** A free subdomain from
+[DuckDNS](https://www.duckdns.org) works well — create one (e.g.
+`yourname-vulnscan.duckdns.org`) and set its IP to this server's public IP.
+(Or use a subdomain of a domain you own: add an `A` record → the server's IP.)
+
+**2. Open port 443** in the EC2 security group (Type: HTTPS, Source: Anywhere).
+Keep port 80 open too — Caddy needs it for the certificate challenge + redirect.
+
+**3. Set the domain and switch to the HTTPS stack** (from the repo root):
+
+```bash
+echo "SITE_DOMAIN=yourname-vulnscan.duckdns.org" >> .env
+sudo docker compose -f deploy/docker-compose.aws.yml down     # free port 80
+sudo docker compose -f deploy/docker-compose.https.yml up -d --build
 ```
 
-…and add this service to the compose file, then change the scanner's `ports`
-to only expose internally (`expose: ["5000"]` instead of `ports: ["80:5000"]`):
-
-```yaml
-  caddy:
-    image: caddy:2
-    ports: ["80:80", "443:443"]
-    volumes:
-      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-    depends_on: [scanner]
-    restart: unless-stopped
-# and add  caddy-data:  under the top-level `volumes:` key
-```
+Give Caddy ~30 seconds to issue the certificate, then open
+**https://yourname-vulnscan.duckdns.org** — with the 🔒 padlock. Your data
+(accounts/scans) is preserved because the volumes are reused.
 
 ---
 
